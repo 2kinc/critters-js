@@ -11,9 +11,12 @@
       world.el.style.border = "3px solid black";
       var a = new world.critter(250,500,50,50,0,'🔵','player');
       document.body.appendChild(world.el);
-      var key = [];
-      document.onkeydown = (e)=>{
+      var key = {};
+      document.onkeypress = (e)=>{
         key[e.key.toLowerCase()] = e.type = true;
+      }
+      document.onkeyup=(e)=>key[e.key.toLowerCase()]=false;
+      setInterval(function () {
         if (key['w']) {
           a.movey(-5)
         }
@@ -26,8 +29,7 @@
         if (key['d']) {
           a.movex(5)
         }
-      }
-      document.onkeyup=()=>key=[];
+      }, 15);
       world.el.addEventListener('click',(e)=>{
         e = new world.critter(e.clientX-25,e.clientY-25,50,50,0,'🙂');
         setInterval(()=>e.rove(100),300);
