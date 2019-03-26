@@ -11,7 +11,7 @@
       world.el.style.border = "3px solid black";
       var a = new world.critter(250,500,50,50,0,'🔵','player');
       document.body.appendChild(world.el);
-      var key = [];
+      var key = {};
       document.onkeydown = (e)=>{
         key[e.key.toLowerCase()] = e.type = true;
         if (key['w']) {
@@ -27,7 +27,7 @@
           a.movex(5)
         }
       }
-      document.onkeyup=()=>key=[];
+      document.onkeyup=(e)=>key[e.key.toLowerCase()]=false;
       world.el.addEventListener('click',(e)=>{
         e = new world.critter(e.clientX-25,e.clientY-25,50,50,0,'🙂');
         setInterval(()=>e.rove(100),300);
