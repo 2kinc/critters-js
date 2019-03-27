@@ -16,13 +16,15 @@ function world(width, height, x, y) {
     this.y = y || 0;
     this.width = w || 50;
     this.height = h || 50;
+    this.color = color || 'black';
+    this.name = name;
     this.el = document.createElement('span');
     this.el.style.top = this.x + 'px';
     this.el.style.left = this.y + 'px';
     this.el.style.width = this.width + 'px';
     this.el.style.height = this.height + 'px';
     this.el.style.fontSize = "0.1px";
-    this.el.style.background = color;
+    this.el.style.background = this.color;
     this.el.style.position = "absolute";
     localworld.el.appendChild(this.el);
     localworld.things.push(this);
