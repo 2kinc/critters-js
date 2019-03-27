@@ -43,8 +43,9 @@ function world(width, height, x, y) {
       }
       (this.transform = ()=>{
         for (i=0;i<localworld.things.length;i++) {
-          if (this.isCollided(this,localworld.things[0]) {
-            console.log(this.isCollided(this,localworld.things[i]));
+          if (this.isCollided(this,localworld.things[0])) {
+            alert('you crashed into an annoying smiley face.');
+            location.reload();
             return;
           } else {
             this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
