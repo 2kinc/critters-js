@@ -29,10 +29,12 @@
         if (key['d']) {
           a.movex(5)
         }
+        
         for (var item of world.things) {
-        	if (world.isCollided(item, a) && item.name != 'player')
-          	alert('OOF!');
-						location.reload();
+        	if (a.isCollided(a, item) && item.name != 'player') {
+            alert('OOF!');
+            location.reload();
+          }
         }
       }, 15);
       world.el.addEventListener('click',(e)=>{
