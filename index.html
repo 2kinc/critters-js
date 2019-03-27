@@ -16,7 +16,7 @@
         key[e.key.toLowerCase()] = e.type = true;
       }
       document.onkeyup=(e)=>key[e.key.toLowerCase()]=false;
-      setInterval(function () {
+      setInterval(()=>{
         if (key['w']) {
           a.movey(-5)
         }
@@ -29,7 +29,6 @@
         if (key['d']) {
           a.movex(5)
         }
-        
         for (var item of world.things) {
         	if (a.isCollided(a, item) && item.name != 'player') {
             location.reload();
@@ -38,7 +37,7 @@
       }, 15);
       world.el.addEventListener('click',(e)=>{
         e = new world.critter(e.clientX-25,e.clientY-25,50,50,0,'🙂');
-        setInterval(()=>e.rove(100),300);
+        setInterval(()=>e.rove(50),300);
       });
     </script>
   </body>
