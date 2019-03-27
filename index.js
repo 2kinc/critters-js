@@ -43,7 +43,7 @@ function world(width, height, x, y) {
       }
       (this.transform = ()=>{
         for (i=0;i<localworld.things.length;i++) {
-          if (this.isCollided(this,localworld.things[i])&&localworld.things[i]!=this) {
+          if (this.isCollided(this,localworld.things[0]) {
             console.log(this.isCollided(this,localworld.things[i]));
             return;
           } else {
