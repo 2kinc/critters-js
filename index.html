@@ -30,7 +30,7 @@
           a.movex(5)
         }
         for (var item of world.things) {
-        	if (world.isCollided(item, a) && item != a)
+        	if (world.isCollided(item, a) && item.name != 'player')
           	alert('OOF!');
 						location.reload();
         }
