@@ -17,7 +17,7 @@ function world(width, height, x, y) {
     this.width = w || 50;
     this.height = h || 50;
     this.color = color || 'black';
-    this.name = name;
+    this.names = name;
     this.el = document.createElement('span');
     this.el.style.top = this.x + 'px';
     this.el.style.left = this.y + 'px';
