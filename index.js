@@ -11,7 +11,22 @@ function world(width, height, x, y) {
   this.el.style.left = this.x + "px";
   this.things = [];
   localworld = this;
-  this.rect = function () {}
+  this.rect = function (x, y, w, h, color, name) {
+    this.x = x || 0;
+    this.y = y || 0;
+    this.width = w || 50;
+    this.height = h || 50;
+    this.el = document.createElement('span');
+    this.el.style.top = this.x + 'px';
+    this.el.style.left = this.y + 'px';
+    this.el.style.width = this.width + 'px';
+    this.el.style.height = this.height + 'px';
+    this.el.style.fontSize = "0.1px";
+    this.el.style.background = color;
+    this.el.style.position = "absolute";
+    localworld.el.appendChild(this.el);
+    localworld.things.push(this);
+  }
   this.critter = function (x, y, w, h, deg, text, name) {
       this.width = w || 50;
       this.height = h || 50;
@@ -42,8 +57,9 @@ function world(width, height, x, y) {
         return false;
       }
       (this.transform = ()=>{
-        for (var i=0;i<localworld.things.length;i++) {
+        for (i=0;i<localworld.things.length;i++) {
           if (this.isCollided(this,localworld.things[i])&&localworld.things[i]!=this) {
+            console.log(this.isCollided(this,localworld.things[i]));
             return;
           } else {
             this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
