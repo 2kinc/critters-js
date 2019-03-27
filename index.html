@@ -29,6 +29,11 @@
         if (key['d']) {
           a.movex(5)
         }
+        for (var item of world.things) {
+        	if (world.isCollided(item, a) && item != a)
+          	alert('OOF!');
+						location.reload();
+        }
       }, 15);
       world.el.addEventListener('click',(e)=>{
         e = new world.critter(e.clientX-25,e.clientY-25,50,50,0,'🙂');
