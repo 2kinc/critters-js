@@ -43,7 +43,7 @@ function world(width, height, x, y) {
       }
       (this.transform = ()=>{
         for (var i=0;i<localworld.things.length;i++) {
-          if (this.isCollided(this,localworld.things[i])&&localworld.things[i]!=this)) {
+          if (this.isCollided(this,localworld.things[i])&&localworld.things[i]!=this) {
             return;
           } else {
             this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
