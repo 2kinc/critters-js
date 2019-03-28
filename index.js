@@ -11,16 +11,15 @@ function world(width, height, x, y) {
   this.el.style.left = this.x + "px";
   this.things = [];
   localworld = this;
-  this.rect = function (x, y, w, h, color, name) {
+  this.rect = function (x, y, w, h, deg, color, name) {
     this.x = x || 0;
     this.y = y || 0;
+    this.deg = deg || 0;
     this.width = w || 50;
     this.height = h || 50;
     this.color = color || 'black';
     this.name = name;
     this.el = document.createElement('span');
-    this.el.style.top = this.x + 'px';
-    this.el.style.left = this.y + 'px';
     this.el.style.width = this.width + 'px';
     this.el.style.height = this.height + 'px';
     this.el.style.fontSize = "0.1px";
@@ -28,6 +27,49 @@ function world(width, height, x, y) {
     this.el.style.position = "absolute";
     localworld.el.appendChild(this.el);
     localworld.things.push(this);
+    this.isCollided = (rect1, rect2)=>{
+      if (rect1.x < rect2.x + rect2.width &&
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y) {
+        return true;
+      }
+      return false;
+    }
+    (this.transform = ()=>{
+        for (i=0;i<localworld.things.length;i++) {
+          if (this.isCollided(this,localworld.things[i])&&localworld.things[i]!=this) {
+            console.log(this.isCollided(this,localworld.things[i]));
+            return;
+          } else {
+            this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
+          }
+        }
+      })();
+    (this.movex = (move)=>{
+              if (this.x + move + this.width < localworld.width && this.x + move > 0) {
+                  this.x += move;
+                  this.transform()
+              } else if (this.x + move >= localworld.width) {
+                  this.x = localworld.width - this.width;
+                  this.transform();
+              } else if (this.x + move <= 0) {
+                  this.x = 0;
+                  this.transform();
+        }
+      })(0);
+      (this.movey = (move)=>{
+          if (this.y + move + this.height < localworld.height && this.y + move > 0) {
+              this.y += move;
+              this.transform()
+          } else if (this.y + move >= localworld.height) {
+              this.y = localworld.height - this.height;
+              this.transform();
+          } else if (this.y + move <= 0) {
+              this.y = 0;
+              this.transform()
+          }
+      })(0);
   }
   this.critter = function (x, y, w, h, deg, text, name) {
       this.width = w || 50;
