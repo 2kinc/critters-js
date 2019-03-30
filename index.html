@@ -9,8 +9,21 @@
     <script type="text/javascript">
       var world = new world('600','600');
       world.el.style.border = "3px solid black";
-      var a = new world.critter(250,500,50,50,0,'🔵','player');
       document.body.appendChild(world.el);
+      var player = new world.critter(250,500,50,50,0,'🔵','player');
+      levels = [()=>{
+        new world.rect(150,150,75,450);
+        new world.rect(325,0,75,600);
+        new world.rect(325,100,75,75);
+        new world.rect(50,500,50,50,0,'#8bc34a','end')
+      },()=>{
+        new world.rect(150,150,75,450);
+        new world.rect(325,0,75,600);
+        new world.rect(325,100,75,75);
+        new world.rect(50,500,50,50,0,'#8bc34a','end')
+      }];
+      levels.current = 0;
+      levels[levels.current]();
       var key = {};
       document.onkeypress = (e)=>{
         key[e.key.toLowerCase()] = e.type = true;
@@ -18,27 +31,30 @@
       document.onkeyup=(e)=>key[e.key.toLowerCase()]=false;
       setInterval(()=>{
         if (key['w']) {
-          a.movey(-5)
+          player.movey(-5)
         }
         if (key['a']) {
-          a.movex(-5)
+          player.movex(-5)
         }
         if (key['s']) {
-          a.movey(5)
+          player.movey(5)
         }
         if (key['d']) {
-          a.movex(5)
+          player.movex(5)
         }
         for (var item of world.things) {
-        	if (a.isCollided(a, item) && item.name != 'player') {
-            location.reload();
+          if (player.isCollided(player, item) && item.name != 'player' && item.name != 'end') {
+            player.x = 250;
+            player.y = 500;
+            player.transform();
+          } else if (player.isCollided(player, item) && item.name == 'end') {
+            player.el.parentElement.removeChild(player.el);
+            world.el.innerHTML = "";
+            levels.current++;levels[levels.current]();
+            player = new world.critter(250,500,50,50,0,'🔵','player');
           }
         }
       }, 15);
-      world.el.addEventListener('click',(e)=>{
-        e = new world.critter(e.clientX-25,e.clientY-25,50,50,0,'🙂');
-        setInterval(()=>e.rove(50),300);
-      });
     </script>
   </body>
 </html>
