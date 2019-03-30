@@ -100,7 +100,7 @@ function world(width, height, x, y) {
         }
         (this.transform = ()=>{
             this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
-            this.el.style.transformOrigin = this.x + this.width / 2 + 'px ' + this.y + this.height / 2 + 'px'
+            this.el.style.transformOrigin = (this.x + this.width / 2) + 'px ' + (this.y + this.height / 2) + 'px'
         }
         )();
         (this.turn = (deg)=>{
