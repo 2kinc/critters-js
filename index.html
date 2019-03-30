@@ -14,12 +14,11 @@
       levels = [()=>{
         new world.rect(150,150,75,450);
         new world.rect(325,0,75,600);
-        new world.rect(325,100,75,75);
         new world.rect(50,500,50,50,0,'#8bc34a','end')
       },()=>{
-        new world.rect(150,150,75,450);
+        new world.rect(150,0,75,250);
+        new world.rect(150,350,75,250);
         new world.rect(325,0,75,600);
-        new world.rect(325,100,75,75);
         new world.rect(50,500,50,50,0,'#8bc34a','end')
       }];
       levels.current = 0;
@@ -48,7 +47,7 @@
             player.y = 500;
             player.transform();
           } else if (player.isCollided(player, item) && item.name == 'end') {
-            player.el.parentElement.removeChild(player.el);
+            player.delete();
             world.el.innerHTML = "";
             levels.current++;levels[levels.current]();
             player = new world.critter(250,500,50,50,0,'🔵','player');

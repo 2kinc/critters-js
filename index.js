@@ -92,6 +92,7 @@ function world(width, height, x, y) {
         localworld.things.push(this);
         this.el.innerHTML = inside || Math.random().toString(36).substring(7).charAt(1);
         this.stop = false;
+        this.delete = ()=> this.el.parentElement.removeChild(this.el);
         this.isCollided = (rect1,rect2)=>{
             if (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y) {
                 return true;
