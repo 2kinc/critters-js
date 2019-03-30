@@ -35,13 +35,8 @@ function world(width, height, x, y) {
         }
         (this.transform = ()=>{
             for (i = 0; i < localworld.things.length; i++) {
-                if (this.isCollided(this, localworld.things[i]) && localworld.things[i] != this) {
-                    console.log(this.isCollided(this, localworld.things[i]));
-                    return;
-                } else {
-                    this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
-                    this.el.style.transformOrigin = this.x + this.width / 2 + 'px ' + this.y + this.height / 2 + 'px'
-                }
+                this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
+                this.el.style.transformOrigin = this.x + this.width / 2 + 'px ' + this.y + this.height / 2 + 'px';
             }
         }
         )();
@@ -77,7 +72,7 @@ function world(width, height, x, y) {
         }
         )(0);
     }
-    this.critter = function(x, y, w, h, deg, text, name) {
+    this.critter = function(x, y, w, h, deg, inside, name) {
         this.width = w || 50;
         this.height = h || 50;
         this.el = document.createElement('span');
@@ -93,10 +88,9 @@ function world(width, height, x, y) {
         this.el.style.textAlign = "center";
         this.el.style.transition = "150ms linear";
         this.el.style.userSelect = "none";
-        this.collisions = [];
         localworld.el.appendChild(this.el);
         localworld.things.push(this);
-        this.el.innerText = text || Math.random().toString(36).substring(7).charAt(1);
+        this.el.innerHTML = inside || Math.random().toString(36).substring(7).charAt(1);
         this.stop = false;
         this.isCollided = (rect1,rect2)=>{
             if (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y) {
@@ -106,8 +100,14 @@ function world(width, height, x, y) {
         }
         (this.transform = ()=>{
             this.el.style.transform = "rotate(" + this.deg + "deg) translate(" + this.x + "px," + this.y + "px)";
+            this.el.style.transformOrigin = this.x + this.width / 2 + 'px ' + this.y + this.height / 2 + 'px'
         }
         )();
+        (this.turn = (deg)=>{
+            this.deg += deg;
+            this.transform();
+        }
+        )(0);
         (this.movex = (move)=>{
             if (this.x + move + this.width < localworld.width && this.x + move > 0 && !this.stop) {
                 this.x += move;
