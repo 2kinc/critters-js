@@ -10,7 +10,10 @@
       var world = new world('600','600');
       world.el.style.border = "3px solid black";
       document.body.appendChild(world.el);
-      var player = new world.critter(250,500,50,50,0,'🔵','player');
+      var player = new world.critter(250,500,50,50,0,'','player');
+      player.style.borderRadius="50%";
+      player.style.background="#1e88e5";
+      player.style.border="10px solid black"
       levels = [()=>{
         new world.rect(150,150,75,450);
         new world.rect(325,0,75,600);
