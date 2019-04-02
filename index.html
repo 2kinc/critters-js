@@ -14,7 +14,8 @@
       player.el.innerHTML="";
       player.el.style.borderRadius="50%";
       player.el.style.background="#1e88e5";
-      player.el.style.border="3px solid black"
+      player.el.style.border="3px solid black";
+      player.el.style.boxSizing="border-box";
       levels = [()=>{
         new world.rect(150,150,75,450);
         new world.rect(325,0,75,600);
