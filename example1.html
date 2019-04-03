@@ -25,6 +25,11 @@
         new world.rect(150,350,75,250);
         new world.rect(325,0,75,600);
         new world.rect(50,500,50,50,0,'#8bc34a','end')
+      },()=>{
+        new world.rect(150,0,75,250);
+        new world.rect(150,350,75,250);
+        new world.rect(325,0,75,600);
+        new world.rect(50,500,50,50,0,'#8bc34a','end')
       }];
       levels.current = 0;
       levels[levels.current]();
@@ -56,7 +61,12 @@
             world.el.innerHTML = "";
             world.things=[];
             levels.current++;levels[levels.current]();
-            player = new world.critter(250,500,50,50,0,'🔵','player');
+            player = new world.critter(250,500,50,50,0,'','player');
+            player.el.innerHTML="";
+            player.el.style.borderRadius="50%";
+            player.el.style.background="#1e88e5";
+            player.el.style.border="4px solid black";
+            player.el.style.boxSizing="border-box";
           }
         }
       }, 15);
