@@ -9,6 +9,10 @@ Then you make a world:
 
 <code>var world = new world()</code>
 
+Then you append the world!
+
+<code>element.appendChild(world.el);</code>
+
 To make a critter, you use <code>new world.critter()</code>.
 
 And a rectangle: <code>new world.rect()</code>.
