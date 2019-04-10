@@ -15,7 +15,6 @@ Then you append the world!
 
 To make a critter, you use <code>new world.critter()</code>.
 
-And a rectangle: <code>new world.rect()</code>.
-
+And a rectangle: <code>new world.rect(x, y, width, height, degrees, color, name)</code>.
 
 Wanna join the coders? Make a pull request!
