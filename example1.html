@@ -1,75 +1,78 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Critters</title>
-  </head>
-  <body>
-    <script src="index.js" charset="utf-8"></script>
-    <script type="text/javascript">
-      var world = new world('600','600');
-      world.el.style.border = "4px solid black";
-      document.body.appendChild(world.el);
-      var player = new world.critter(250,500,50,50,0,'','player');
-      player.el.innerHTML="";
-      player.el.style.borderRadius="50%";
-      player.el.style.background="#1e88e5";
-      player.el.style.border="4px solid black";
-      player.el.style.boxSizing="border-box";
-      levels = [()=>{
-        new world.rect(150,150,75,450);
-        new world.rect(325,0,75,600);
-        new world.rect(50,500,50,50,0,'#8bc34a','end')
-      },()=>{
-        new world.rect(150,0,75,250);
-        new world.rect(150,350,75,250);
-        new world.rect(325,0,75,600);
-        new world.rect(50,500,50,50,0,'#8bc34a','end')
-      },()=>{
-        new world.rect(150,0,75,250);
-        new world.rect(150,350,75,250);
-        new world.rect(325,0,75,600);
-        new world.rect(50,500,50,50,0,'#8bc34a','end')
-      }];
-      levels.current = 0;
-      levels[levels.current]();
-      var key = {};
-      document.onkeypress = (e)=>{
-        key[e.key.toLowerCase()] = e.type = true;
+
+<head>
+  <meta charset="utf-8">
+  <title>Critters</title>
+</head>
+
+<body>
+  <script src="main.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    var world = new World('600', '600');
+    world.el.style.border = "4px solid black";
+    document.body.appendChild(world.el);
+    var player = new world.Critter(250, 500, 50, 50, 0, '', 'player');
+    player.el.innerHTML = "";
+    player.el.style.borderRadius = "50%";
+    player.el.style.background = "#1e88e5";
+    player.el.style.border = "4px solid black";
+    player.el.style.boxSizing = "border-box";
+    levels = [() => {
+      new world.Rect(150, 150, 75, 450);
+      new world.Rect(325, 0, 75, 600);
+      new world.Rect(50, 500, 50, 50, 0, '#8bc34a', 'end')
+    }, () => {
+      new world.Rect(150, 0, 75, 250);
+      new world.Rect(150, 350, 75, 250);
+      new world.Rect(325, 0, 75, 600);
+      new world.Rect(50, 500, 50, 50, 0, '#8bc34a', 'end')
+    }, () => {
+      new world.Rect(150, 0, 75, 250);
+      new world.Rect(150, 350, 75, 250);
+      new world.Rect(325, 0, 75, 600);
+      new world.Rect(50, 500, 50, 50, 0, '#8bc34a', 'end')
+    }];
+    levels.current = 0;
+    levels[levels.current]();
+    var key = {};
+    document.onkeypress = (e) => {
+      key[e.key.toLowerCase()] = e.type = true;
+    }
+    document.onkeyup = (e) => key[e.key.toLowerCase()] = false;
+    setInterval(() => {
+      if (key['w']) {
+        player.movey(-5)
       }
-      document.onkeyup=(e)=>key[e.key.toLowerCase()]=false;
-      setInterval(()=>{
-        if (key['w']) {
-          player.movey(-5)
+      if (key['a']) {
+        player.movex(-5)
+      }
+      if (key['s']) {
+        player.movey(5)
+      }
+      if (key['d']) {
+        player.movex(5)
+      }
+      for (var item of world.things) {
+        if (player.isCollided(player, item) && item.name != 'player' && item.name != 'end') {
+          player.x = 250;
+          player.y = 500;
+          player.transform();
+        } else if (player.isCollided(player, item) && item.name == 'end') {
+          player.delete();
+          world.el.innerHTML = "";
+          world.things = [];
+          levels.current++; levels[levels.current]();
+          player = new world.Critter(250, 500, 50, 50, 0, '', 'player');
+          player.el.innerHTML = "";
+          player.el.style.borderRadius = "50%";
+          player.el.style.background = "#1e88e5";
+          player.el.style.border = "4px solid black";
+          player.el.style.boxSizing = "border-box";
         }
-        if (key['a']) {
-          player.movex(-5)
-        }
-        if (key['s']) {
-          player.movey(5)
-        }
-        if (key['d']) {
-          player.movex(5)
-        }
-        for (var item of world.things) {
-          if (player.isCollided(player, item) && item.name != 'player' && item.name != 'end') {
-            player.x = 250;
-            player.y = 500;
-            player.transform();
-          } else if (player.isCollided(player, item) && item.name == 'end') {
-            player.delete();
-            world.el.innerHTML = "";
-            world.things=[];
-            levels.current++;levels[levels.current]();
-            player = new world.critter(250,500,50,50,0,'','player');
-            player.el.innerHTML="";
-            player.el.style.borderRadius="50%";
-            player.el.style.background="#1e88e5";
-            player.el.style.border="4px solid black";
-            player.el.style.boxSizing="border-box";
-          }
-        }
-      }, 15);
-    </script>
-  </body>
+      }
+    }, 15);
+  </script>
+</body>
+
 </html>
