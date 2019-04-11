@@ -20,3 +20,5 @@ And a rectangle: <code>new World.Rect(x, y, width, height, degrees, color, name)
 Learn more [here](https://2kinc.me/critters)
 
 Wanna join the coders? Make a pull request!
+
+   &lt;(o)
