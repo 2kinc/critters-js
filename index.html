@@ -1,36 +1,75 @@
-<html lang="en" dir="ltr"><head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta charset="utf-8">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300" rel="stylesheet">
-    <title>Critters</title>
-    <style>
-      body {
-        font-family:'Roboto',sans-serif;
-	background:#111;
-      }
-      #hi{font-weight: 100;
-    font-size: 220%;
-    text-shadow: 0px 0px 2px #f44336;
-    color: #f44336;
-    top: 20px;
-    right: 0;
-    left: 0;
-    margin-right: auto;
-    margin-left: auto;
-    position: fixed;
-    border-radius: 5px;
-    box-shadow: 0px 0px 2px 1.5px #f44336;
-    background: transparent;
-    border: 0.5px solid #f44336;
-    width: 142px;}
-    a{text-decoration:none;color: #2196F3;}</style>
-  </head>
-  <body><div style="
-    text-align: center;
-    padding-top: 90px;
-">
-    <div id="hi">Critters!</div>
-    <a href="example1.html">An example made with crittters!</a>
-  <br><br><a href="example2.html">Another example made with critters!</a></div>
+<html lang="en" dir="ltr">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300|Roboto+Mono:100" rel="stylesheet">
+        <title>Critters</title>
+        <style>
+            body {
+                font-family: 'Roboto',sans-serif;
+                background: #111;
+            }
 
-</body></html>
+            .hi {
+                font-weight: 100;
+                font-size: 220%;
+                text-shadow: 0px 0px 2px #f44336;
+                color: #f44336;
+                top: 20px;
+                right: 0;
+                left: 0;
+                margin-right: auto;
+                margin-left: auto;
+                border-radius: 5px;
+                box-shadow: 0px 0px 2px 1.5px #f44336;
+                background: transparent;
+                border: 0.5px solid #f44336;
+                width: 142px;
+            }
+
+            a {
+                text-decoration: none;
+                color: #2196F3;
+            }
+	    pre, code {
+                background:#1976d2;
+                font-family:'Roboto Mono', monospace;
+                color:white!important;
+	    }
+            ::selection {
+              background: #2196F3;
+	      color:white;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="text-align: center;">
+            <h1 class="hi">Critters!</h1>
+            <a href="example1.html">An example made with crittters!</a>
+            <br>
+            <br>
+            <a href="example2.html">Another example made with critters!</a>
+            <br>
+            <br>
+            <div style="color: #2196F3;">
+                <h1 class="hi">Docs</h1>
+                Its a canvas like thing, except made with html.
+		<br>
+		First, to get started, you import the script:
+		<br><br>
+                <code>&lt;script src="https://2kinc.me/critters/main.js"&gt;&lt;/script&gt;</code><br><br>
+                Then you make a world:
+		<br><br>
+                <code>var world = new World(width, height, x, y)</code><br><br>
+                Then you append the world!
+		<br><br>
+                <code>element.appendChild(world.el);</code>
+                <br><br>
+                To make a critter, you use  <code>new World.Critter(x, y, width, height, deg, innerHTML, name)</code>
+                <br><br>
+                And a rectangle: <code>new world.rect(x, y, width, height, degrees, color, name)</code>
+                <br>
+            </div>
+        </div>
+    </body>
+</html>
