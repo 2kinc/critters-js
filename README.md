@@ -17,6 +17,6 @@ To make a critter, you use <code>new World.Critter(x, y, width, height, deg, inn
 
 And a rectangle: <code>new World.Rect(x, y, width, height, degrees, color, name)</code>.
 
-Learn more [here](2kinc.me/critters)
+Learn more [here](https://2kinc.me/critters)
 
 Wanna join the coders? Make a pull request!
