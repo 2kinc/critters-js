@@ -67,8 +67,8 @@ function World(parent, bgcolor, width, height, camx, camy) {
       if (obj.type == 'rectangle') {
         that.context.beginPath();
         that.context.fillStyle = obj.color;
-        that.context.fillRect(obj.x - that.cam.x, obj.y - that.cam.y, obj.width, obj.height);
-        that.context.closePath();
+        that.context.rect(obj.x - that.cam.x, obj.y - that.cam.y, obj.width, obj.height);
+        that.context.fill();
       }
     });
     requestAnimationFrame(that.drawFrame);
