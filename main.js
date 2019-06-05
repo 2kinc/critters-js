@@ -62,7 +62,7 @@ function World(parent, bgcolor, width, height, camx, camy) {
         that.context.beginPath();
         that.context.fillStyle = obj.color;
         that.context.arc(obj.x - that.cam.x, obj.y - that.cam.y, obj.radius, 0, 6.283185);
-        that.context.closePath();
+        that.context.fill();
       }
       if (obj.type == 'rectangle') {
         that.context.beginPath();
