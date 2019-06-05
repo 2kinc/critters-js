@@ -37,17 +37,17 @@ function World(parent, bgcolor, width, height, camx, camy) {
     this.acceleration = {x: 0,y: 0};
     this.color = color;
   }
-  this.Image = function(name, x, y, src, width, height, color, mass) {
+  this.Image = function(name, x, y,width, height, src, flip, mass) {
     this.name = name;
     this.x = x;
     this.mass = mass || 1;
     this.y = y;
     this.src = src;
+    this.flip = flip;
     this.type = 'image';
     this.acceleration = {x: 0,y: 0};
     this.width = width;
     this.height = height;
-    this.color = color;
   }
   this.set = (obj) => that.objects.set(obj.name, obj);  //set the object
   this.get = (name) => {return that.objects.get(name)}; //get the object
@@ -59,16 +59,28 @@ function World(parent, bgcolor, width, height, camx, camy) {
     that.context.fill();
     that.objects.forEach(function(obj) {
       if (obj.type == 'circle') {
-        that.context.beginPath();
+        that.context.save();
+        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
         that.context.fillStyle = obj.color;
-        that.context.arc(obj.x - that.cam.x, obj.y - that.cam.y, obj.radius, 0, 6.283185);
+        that.context.arc(0,0, obj.radius, 0, 6.283185);
         that.context.fill();
+        that.context.restore();
       }
       if (obj.type == 'rectangle') {
-        that.context.beginPath();
+        that.context.save();
+        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
         that.context.fillStyle = obj.color;
-        that.context.rect(obj.x - that.cam.x, obj.y - that.cam.y, obj.width, obj.height);
-        that.context.fill();
+        that.context.fillRect(0,0, obj.width, obj.height);
+        that.context.restore();
+      }
+      if (obj.type == 'image') {
+        that.context.save();
+        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
+        that.context.scale((obj.flip ? -1 : 1), 1)
+        var image = new Image();
+        image.src = obj.src;
+        that.context.drawImage(image, 0, 0, obj.width, obj.height);
+        that.context.restore();
       }
     });
     requestAnimationFrame(that.drawFrame);

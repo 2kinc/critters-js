@@ -9,9 +9,10 @@
     <script>
       var world = new World(document.body, 'white', 500, 500);
       world.start();
+      world.set(new world.Circle('why3', 100, 200, 50, 'red',5));
       world.set(new world.Rectangle('why', 200, 200, 100, 100,'yellow',1));
       world.set(new world.Rectangle('why2', 400, 400, 100, 100,'blue',5));
-      world.set(new world.Circle('why3', 100, 200, 50, 'red',5));
+      world.set(new world.Image('why4', 0, 50, 100, 100,'https://www.purelypoultry.com/images/call-ducks-for-sale.jpg', false, 5));
       world.update = function() {
         var why = world.get('why');
         var keys = world.keys;
