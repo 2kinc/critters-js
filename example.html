@@ -9,21 +9,19 @@
     <script>
       var world = new World(document.body, 'white', 500, 500);
       world.start();
-      world.set(new world.Circle('why3', 100, 200, 50, 'red',5));
-      world.set(new world.Rectangle('why', 200, 200, 100, 100,'yellow',1));
-      world.set(new world.Rectangle('why2', 400, 400, 100, 100,'blue',5));
-      world.set(new world.Image('why4', 0, 50, 100, 100,'https://www.purelypoultry.com/images/call-ducks-for-sale.jpg', false, 5));
+      world.set(new world.Rectangle('player', 200, 200, 50, 50,'yellow',1));
+      world.set(new world.Rectangle('ground', 0, world.height - 50, world.width, 50, 'black', 1000));
+      var player = world.get('player');
+      var keys = world.keys;
       world.update = function() {
-        var why = world.get('why');
-        var keys = world.keys;
-        if (keys.w) why.y-=2;
-        if (keys.a) why.x-=2;
-        if (keys.s) why.y+=2;
-        if (keys.d) why.x+=2;
-        if (why.x > world.width - why.width) why.x = world.width - why.width;
-        if (why.x < 0) why.x = 0;
-        if (why.y > world.height - why.height) why.y = world.height - why.height;
-        if (why.y < 0) why.y = 0;
+        if (keys.w) player.y-=4;
+        if (keys.a) player.x-=4;
+        if (keys.s) player.y+=4;
+        if (keys.d) player.x+=4;
+        if (player.x > 450 - player.width) player.x = 450 - player.width;
+        if (player.x < 0) player.x = 0;
+        if (player.y > 450 - player.height) player.y = 450 - player.height;
+        if (player.y < 0) why.y = 0;
       }
     </script>
   </body>

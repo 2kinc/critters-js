@@ -52,6 +52,32 @@ function World(parent, bgcolor, width, height, camx, camy) {
   this.set = (obj) => that.objects.set(obj.name, obj);  //set the object
   this.get = (name) => {return that.objects.get(name)}; //get the object
   this.update = function() {/*Happens every second*/};
+  this.collisionWith = function(obj1, obj2) {
+    if (obj1.type == 'rectangle' && obj2.type == 'rectangle') {
+      return !(obj2.x > obj1.x + obj1.width || obj2.x + obj2.width < obj1.x || obj2.y > obj1.y + obj1.height || obj2.y + obj2.height < obj1.y)
+    }
+    if (obj1.type == 'rectangle' && obj2.type == 'circle') {
+      var distX = Math.abs(obj2.x - obj1.x-obj1.width/2);
+      var distY = Math.abs(obj2.y - obj1.y-obj1.height/2);
+      if (distX > (obj1.width/2 + obj2.radius)) { return false; }
+      if (distY > (obj1.height/2 + obj2.radius)) { return false; }
+      if (distX <= (obj1.width/2)) { return true; }
+      if (distY <= (obj1.height/2)) { return true; }
+      return (distX-obj1.width/2**2+distY-obj1.height/2**2<=(obj2.radius**2));
+    }
+    if (obj1.type == 'circle' && obj2.type == 'rectangle') {
+      var distX = Math.abs(obj2.x - obj2.x-obj2.width/2);
+      var distY = Math.abs(obj1.y - obj2.y-obj2.height/2);
+      if (distX > (obj2.width/2 + obj1.radius)) { return false; }
+      if (distY > (obj2.height/2 + obj1.radius)) { return false; }
+      if (distX <= (obj2.width/2)) { return true; }
+      if (distY <= (obj2.height/2)) { return true; }
+      return (distX-obj2.width/2**2+distY-obj2.height/2**2<=(obj1.radius**2));
+    }
+    if (obj1.type == 'circle' && obj2.type == 'circle') {
+      return ((obj2.x-obj1.x)**2 + (obj1.y-obj2.y)**2 <= (obj1.radius+obj2.radius)**2);
+    }
+  }
   this.drawFrame = function() { //Also happens every second
     that.context.beginPath();
     that.context.fillStyle = that.bgcolor;
