@@ -83,7 +83,6 @@ function World(parent, bgcolor, width, height, camx, camy) {
         that.context.restore();
       }
     });
-    requestAnimationFrame(that.drawFrame);
   }
   this.animationFrame = function () {
     that.drawFrame();
