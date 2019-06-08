@@ -7,21 +7,23 @@
   <body>
     <script src="main.js"></script>
     <script>
-      var world = new World(document.body, 'white', 500, 500);
+      var world = new World(document.body, 'white', 500, 500, 0, 0, {x: 0, y: 1});
       world.start();
       world.set(new world.Rectangle('player', 200, 200, 50, 50,'yellow',1));
       world.set(new world.Rectangle('ground', 0, world.height - 50, world.width, 50, 'black', 1000));
       var player = world.get('player');
+      var ground = world.get('ground');
+      ground.gravity = false;
       var keys = world.keys;
       world.update = function() {
-        if (keys.w) player.y-=4;
-        if (keys.a) player.x-=4;
-        if (keys.s) player.y+=4;
-        if (keys.d) player.x+=4;
-        if (player.x > 450 - player.width) player.x = 450 - player.width;
+        if (keys.w) world.addForce({y: -4}, player);
+        if (keys.a) world.addForce({x: -4}, player);
+        if (keys.s) world.addForce({y: 4}, player);
+        if (keys.d) world.addForce({x: 4}, player);
+        if (player.x > 500 - player.width) player.x = 500 - player.width;
         if (player.x < 0) player.x = 0;
-        if (player.y > 450 - player.height) player.y = 450 - player.height;
-        if (player.y < 0) why.y = 0;
+        if (player.y < 0) player.y = 0;
+        if (player.y > 500 - player.height) player.y = 500 - player.height;
       }
     </script>
   </body>
