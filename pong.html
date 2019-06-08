@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pong by Critters</title>
+  </head>
+  <body>
+    <script src="main.js" charset="utf-8"></script>
+    <script type="text/javascript">
+        var pong = new World(document.body, 'black', 800, 400, 0, 0);
+        pong.start();
+        var p1, p2, ball;
+        pong.set(p1 = new pong.Rectangle('p1', 50, 200, 10, 100, 'white'));
+        pong.set(p2 = new pong.Rectangle('p2', 750, 150, 10, 100, 'white'));
+        pong.set(ball = new pong.Circle('ball', 400, 200, 10, 'white'));
+        var ballleft = Math.random() >= 0.5;
+        var ballup = Math.random() >= 0.5;
+        var keys = pong.keys;
+        var p1points = 0;
+        var p2points = 0;
+        pong.update = function() {
+          if (ballleft) ball.x -= 2.5;
+          if (!ballleft) ball.x += 2.5;
+          if (ballup) ball.y -= 2;
+          if (!ballup) ball.y += 2;
+          if (ball.y < 10) ballup = false;
+          if (ball.y > 390) ballup = true;
+          if (ball.x < 10) {
+            p2points++;
+            ball.x = 400;
+            ball.y = 200;
+          }
+          if (ball.x > 790) {
+            p1points++;
+            ball.x = 400;
+            ball.y = 200;
+          }
+          if (pong.collisionWith(ball, p1) || pong.collisionWith(ball, p2)) {
+            ballleft = !ballleft;
+            ballup = Math.random() >= 0.5;
+          }
+          if (keys.w || keys.arrowup) p1.y -= 3;
+          if (keys.s || keys.arrowdown) p1.y += 3;
+          if (p1.y < 0) p1.y = 0;
+          if (p1.y > 300) p1.y = 300;
+          if (ball.y <  p2.y) p2.y -= 1.7;
+          if (ball.y >  p2.y) p2.y += 1.7;
+          if (p2.y < 0) p2.y = 0;
+          if (p2.y > 300) p2.y = 300;
+        };
+    </script>
+  </body>
+</html>
