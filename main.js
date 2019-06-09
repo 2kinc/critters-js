@@ -15,6 +15,7 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
   this.gravity = gravity || {x: 0, y: 0};
   this.objects = new Map(); //where all the objects go
   this.keys = {};
+  this.stopped = false;
   this.atmosphere = {
     density: 1
   };
@@ -207,11 +208,15 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     });
   }
   this.animationFrame = function () {
+    if (that.stopped) return;
     that.physics();
     that.update();
     that.drawFrame();
-
     requestAnimationFrame(that.animationFrame);
   }
-  this.start = () => requestAnimationFrame(that.animationFrame);
+  this.start = () => {
+    requestAnimationFrame(that.animationFrame);
+    that.stopped = false
+  };
+  this.stop = () => that.stopped = true;
 }
