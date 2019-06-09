@@ -54,7 +54,7 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     this.acceleration = { x: 0, y: 0 };
     this.color = color;
   }
-  this.Image = function (name, x, y, width, height, src, flip, mass) {
+  this.Image = function (name, x, y, width, height, src, mass) {
     this.name = name;
     this.x = x;
     if (mass) {
@@ -64,12 +64,27 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     this.mass = mass || 1;
     this.y = y;
     this.src = src;
-    this.flip = flip;
     this.type = 'image';
     this.acceleration = { x: 0, y: 0 };
     this.width = width;
     this.height = height;
-  }
+  };
+  this.Text = function (name, x, y, text, size, family, color, mass) {
+    this.name = name;
+    this.x = x;
+    this.text = text;
+    if (mass) {
+      this.rigidBody = true;
+      this.gravity = true;
+    }
+    this.mass = mass || 1;
+    this.y = y;
+    this.type = 'text';
+    this.acceleration = { x: 0, y: 0 };
+    this.size = size;
+    this.family = family;
+    this.color = color;
+  };
   this.addForce = function (force, object) {
     object.acceleration.x += (force.x / (object.mass || 1)) || 0;
     object.acceleration.y += (force.y / (object.mass || 1)) || 0;
@@ -163,6 +178,14 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
         var image = new Image();
         image.src = obj.src;
         that.context.drawImage(image, 0, 0, obj.width, obj.height);
+        that.context.restore();
+      }
+      if (obj.type == 'text') {
+        that.context.save();
+        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
+        that.context.fillStyle = obj.color;
+        that.context.font = obj.size + ' ' +  obj.family;
+        that.context.fillText(obj.text, 0, 0);
         that.context.restore();
       }
     });
