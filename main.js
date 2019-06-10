@@ -100,15 +100,16 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     if (object.rigidBody === true) {
       that.objects.forEach(function (obj){
         if (obj != object && obj.rigidBody === true && that.collisionWith(object, obj)) {
-          object.x = previous.x;
+          var col = that.collisionWith(object, obj, true);
+          if (!col.down && !col.up) object.x = previous.x;
           object.y = previous.y;
           that.addForce({
-            x: object.acceleration.x,
+            x: (!col.down && !col.up) ? object.acceleration.x : 0,
             y: object.acceleration.y
           }, obj);
           that.addForce({
-            x: object.acceleration.x * -2,
-            y: object.acceleration.y * -2
+            x: (!col.down && !col.up) ? object.acceleration.x * -1.1 : 0,
+            y: object.acceleration.y * -1.1
           }, object);
         }
       });
@@ -117,19 +118,30 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
   this.set = (...objs) => {objs.forEach(obj=>that.objects.set(obj.name, obj))};  //set the object
   this.get = (name) => { return that.objects.get(name) }; //get the object
   this.update = function () {/*Happens every second*/ };
-  this.collisionWith = function (obj1, obj2) {
+  this.collisionWith = function (obj1, obj2, advanced) {
+    rlud = advanced || false;
     if (obj1.type == 'rectangle' && obj2.type == 'rectangle') {
-      return !(obj2.x > obj1.x + obj1.width || obj2.x + obj2.width < obj1.x || obj2.y > obj1.y + obj1.height || obj2.y + obj2.height < obj1.y)
+      if (!rlud) return !(obj2.x > obj1.x + obj1.width || obj2.x + obj2.width < obj1.x || obj2.y > obj1.y + obj1.height || obj2.y + obj2.height < obj1.y)
+      if (rlud) {
+        var d = !(obj2.x > obj1.x + obj1.width || obj2.x + obj2.width < obj1.x || obj2.y > obj1.y + obj1.height || obj2.y + obj2.height < obj1.y);
+        var ob = {down:false,up:false,right:false,left:false}
+        if (!d) return ob;
+        if (obj1.y + obj1.height < obj2.y + obj2.height/2) ob.down = true;
+        if (obj1.y > obj2.y + obj2.height/2) ob.up = true;
+        if (obj1.x > obj2.x + obj2.width/2) ob.left = true;
+        if (obj1.x + obj1.width < obj2.x + obj2.width/2) ob.right = true;
+        return ob;
+      }
     }
     if (obj1.type == 'rectangle' && obj2.type == 'circle') {
       var circle = obj2;
       var rect = obj1;
       var distX = Math.abs(circle.x - rect.x-rect.width/2);
       var distY = Math.abs(circle.y - rect.y-rect.height/2);
-      if (distX > (rect.width/2 + circle.radius)) { return false; }
-      if (distY > (rect.height/2 + circle.radius)) { return false; }
-      if (distX <= (rect.width/2)) { return true; }
-      if (distY <= (rect.height/2)) { return true; }
+      if (distX > (rect.width/2 + circle.radius)) return false;
+      if (distY > (rect.height/2 + circle.radius)) return false;
+      if (distX <= (rect.width/2) && !rlud) return true;
+      if (distY <= (rect.height/2) && !rlud) return true;
       var dx=distX-rect.width/2;
       var dy=distY-rect.height/2;
       return (dx*dx+dy*dy<=(circle.radius**2));
@@ -139,16 +151,22 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
       var rect = obj2;
       var distX = Math.abs(circle.x - rect.x-rect.width/2);
       var distY = Math.abs(circle.y - rect.y-rect.height/2);
-      if (distX > (rect.width/2 + circle.radius)) { return false; }
-      if (distY > (rect.height/2 + circle.radius)) { return false; }
-      if (distX <= (rect.width/2)) { return true; }
-      if (distY <= (rect.height/2)) { return true; }
+      if (distX > (rect.width/2 + circle.radius)) return false;
+      if (distY > (rect.height/2 + circle.radius)) return false;
+      if (distX <= (rect.width/2)) return true;
+      if (distY <= (rect.height/2)) return true;
       var dx=distX-rect.width/2;
       var dy=distY-rect.height/2;
       return (dx*dx+dy*dy<=(circle.r**2));
     }
     if (obj1.type == 'circle' && obj2.type == 'circle') {
-      return ((obj2.x - obj1.x) ** 2 + (obj2.y - obj1.y) ** 2 <= (obj1.radius + obj2.radius) ** 2);
+      if (!rlud) return ((obj2.x - obj1.x) ** 2 + (obj2.y - obj1.y) ** 2 <= (obj1.radius + obj2.radius) ** 2);
+      if (rlud) {
+        var d = ((obj2.x - obj1.x) ** 2 + (obj2.y - obj1.y) ** 2 <= (obj1.radius + obj2.radius) ** 2);
+        if (!d) return false;
+        //var
+        //if ()
+      }
     }
   }
   this.drawFrame = function () { //Also happens every second
