@@ -20,8 +20,8 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     density: 1
   };
   if (customProperties) {
-    for (const customProperty of customProperties) {
-      this[customProperty] = customProperties[customProperty];
+    for (const property of customProperties) {
+      this[property] = customProperties[property];
     }
   }
   document.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = e.type = true);
@@ -101,15 +101,17 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
       that.objects.forEach(function (obj){
         if (obj != object && obj.rigidBody === true && that.collisionWith(object, obj)) {
           var col = that.collisionWith(object, obj, true);
-          if (!col.down && !col.up) object.x = previous.x;
-          object.y = previous.y;
+          if (col.down || col.up) {col.right = false;col.left = false;}
+          if (col.right || col.left) {col.down = false;col.up = false;}
+          if (col.down || col.up) object.y = previous.y;
+          if (col.right || col.left) object.x = previous.x;
           that.addForce({
-            x: (!col.down && !col.up) ? object.acceleration.x : 0,
-            y: object.acceleration.y
+            x: (col.left || col.right) ? object.acceleration.x : 0,
+            y: (col.down || col.up) ? object.acceleration.y : 0
           }, obj);
           that.addForce({
-            x: (!col.down && !col.up) ? object.acceleration.x * -1.1 : 0,
-            y: object.acceleration.y * -1.1
+            x: (col.left || col.right) ? -object.acceleration.x : 0,
+            y: (col.down || col.up) ? -object.acceleration.y : 0
           }, object);
         }
       });
@@ -118,13 +120,13 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
   this.set = (...objs) => {objs.forEach(obj=>that.objects.set(obj.name, obj))};  //set the object
   this.get = (name) => { return that.objects.get(name) }; //get the object
   this.update = function () {/*Happens every second*/ };
-  this.collisionWith = function (obj1, obj2, advanced) {
-    rlud = advanced || false;
+  this.collisionWith = function (obj1, obj2, rlud) {
+    rlud = rlud || false;
     if (obj1.type == 'rectangle' && obj2.type == 'rectangle') {
       if (!rlud) return !(obj2.x > obj1.x + obj1.width || obj2.x + obj2.width < obj1.x || obj2.y > obj1.y + obj1.height || obj2.y + obj2.height < obj1.y)
       if (rlud) {
         var d = !(obj2.x > obj1.x + obj1.width || obj2.x + obj2.width < obj1.x || obj2.y > obj1.y + obj1.height || obj2.y + obj2.height < obj1.y);
-        var ob = {down:false,up:false,right:false,left:false}
+        var ob = {down:false,up:false,right:false,left:false};
         if (!d) return ob;
         if (obj1.y + obj1.height < obj2.y + obj2.height/2) ob.down = true;
         if (obj1.y > obj2.y + obj2.height/2) ob.up = true;
@@ -136,15 +138,33 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     if (obj1.type == 'rectangle' && obj2.type == 'circle') {
       var circle = obj2;
       var rect = obj1;
-      var distX = Math.abs(circle.x - rect.x-rect.width/2);
-      var distY = Math.abs(circle.y - rect.y-rect.height/2);
-      if (distX > (rect.width/2 + circle.radius)) return false;
-      if (distY > (rect.height/2 + circle.radius)) return false;
-      if (distX <= (rect.width/2) && !rlud) return true;
-      if (distY <= (rect.height/2) && !rlud) return true;
-      var dx=distX-rect.width/2;
-      var dy=distY-rect.height/2;
-      return (dx*dx+dy*dy<=(circle.radius**2));
+      if (!rlud) {
+        var distX = Math.abs(circle.x - rect.x-rect.width/2);
+        var distY = Math.abs(circle.y - rect.y-rect.height/2);
+        if (distX > (rect.width/2 + circle.radius)) return false;
+        if (distY > (rect.height/2 + circle.radius)) return false;
+        if (distX <= (rect.width/2)) return true;
+        if (distY <= (rect.height/2)) return true;
+        var dx=distX-rect.width/2;
+        var dy=distY-rect.height/2;
+        return (dx*dx+dy*dy<=(circle.radius**2));
+      } if (rlud) {
+        var ob = {right:false, left:false, up:false, down:false};
+        var distX = Math.abs(circle.x - rect.x-rect.width/2);
+        var distY = Math.abs(circle.y - rect.y-rect.height/2);
+        if (distX > (rect.width/2 + circle.radius)) return ob;
+        if (distY > (rect.height/2 + circle.radius)) return ob;
+        var dx=distX-rect.width/2;
+        var dy=distY-rect.height/2;
+        var d = (dx*dx+dy*dy<=(circle.radius**2));
+        if (!d) return ob;
+        if (rect.x > circle.x + circle.radius) ob.right = true;
+        if (rect.y + rect.height < circle.y + circle.radius) ob.down = true;
+        if (rect.y > circle.y + circle.radius) ob.up = true;
+        if (rect.x > circle.x + circle.radius) ob.left = true;
+        if (rect.x + rect.width < circle.x + circle.radius) ob.right = true;
+        return ob;
+      }
     }
     if (obj1.type == 'circle' && obj2.type == 'rectangle') {
       var circle = obj1;
