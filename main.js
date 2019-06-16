@@ -82,10 +82,15 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     this.y = y;
     this.type = 'text';
     this.acceleration = { x: 0, y: 0 };
-    this.size = size;
+    this.size = size + 'px';
     this.family = family;
     this.color = color;
   };
+  this.mouse = {x:0, y:0};
+  that.el.onmousemove = function(e) {
+    that.mouse.x = e.clientX;
+	  that.mouse.y = e.clientY;
+  }
   this.addForce = function (force, object) {
     object.acceleration.x += (force.x / (object.mass || 1)) || 0;
     object.acceleration.y += (force.y / (object.mass || 1)) || 0;

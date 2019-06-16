@@ -14,7 +14,8 @@
       world.set(new world.Rectangle('player', 200, 200, 50, 50,'yellow',1.001),
       new world.Rectangle('ground', 0, 450, 1000, 50, 'black', 1000),
       new world.Rectangle('d', 400, 200, 400, 400, 'black', 1000),
-      new world.Circle('dd', 600, 200, 50, 'blue', 1000));
+      new world.Circle('dd', 600, 200, 50, 'blue', 1000),
+      new world.Text('ddd', 50, 50, 'd', 15, 'Arial', 'black'));
       world.get('d').gravity = false;
       var player = world.get('player');
       var ground = world.get('ground');
@@ -22,6 +23,11 @@
       ground.gravity = false;
       var keys = world.keys;
       world.update = function() {
+        world.get('ddd').text = (world.mouse.x+world.cam.x) + ',' + (world.mouse.y+world.cam.y);
+        world.get('ddd').x = 50 + world.cam.x;
+        world.get('ddd').y = 50 + world.cam.y;
+        player.x = world.mouse.x-30+world.cam.x;
+        player.y = world.mouse.y-30+world.cam.y;
         if (keys.w) world.addForce({y: -4}, player);
         if (keys.a) world.addForce({x: -2}, player);
         if (keys.d) world.addForce({x: 2}, player);
