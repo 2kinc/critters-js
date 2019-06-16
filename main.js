@@ -3,6 +3,7 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
   this.cam = {};
   this.cam.x = camx || 0;
   this.cam.y = camy || 0;
+  this.cam.zoom = 1;
   this.bgcolor = bgcolor || 'white';
   this.width = width || 500;
   this.height = height || 500;
@@ -202,33 +203,33 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     that.objects.forEach(function (obj) {
       if (obj.type == 'circle') {
         that.context.save();
-        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
         that.context.fillStyle = obj.color;
-        that.context.arc(0, 0, obj.radius, 0, 6.283185);
+        that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, 6.283185);
         that.context.fill();
         that.context.restore();
       }
-      if (obj.type == 'rectangle') {
+      else if (obj.type == 'rectangle') {
         that.context.save();
-        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
         that.context.fillStyle = obj.color;
-        that.context.fillRect(0, 0, obj.width, obj.height);
+        that.context.fillRect(0, 0, obj.width * that.cam.zoom, obj.height * that.cam.zoom);
         that.context.restore();
       }
-      if (obj.type == 'image') {
+      else if (obj.type == 'image') {
         that.context.save();
-        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
         that.context.scale((obj.flip ? -1 : 1), 1)
         var image = new Image();
         image.src = obj.src;
-        that.context.drawImage(image, 0, 0, obj.width, obj.height);
+        that.context.drawImage(image, 0, 0, obj.width * that.cam.zoom, obj.height * that.cam.zoom);
         that.context.restore();
       }
-      if (obj.type == 'text') {
+      else if (obj.type == 'text') {
         that.context.save();
-        that.context.translate(obj.x - that.cam.x, obj.y - that.cam.y);
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
         that.context.fillStyle = obj.color;
-        that.context.font = obj.size + ' ' +  obj.family;
+        that.context.font = (obj.size * that.cam.zoom) + 'px ' +  obj.family;
         that.context.fillText(obj.text, 0, 0);
         that.context.restore();
       }
