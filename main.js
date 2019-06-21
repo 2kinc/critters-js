@@ -83,7 +83,7 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     this.y = y;
     this.type = 'text';
     this.acceleration = { x: 0, y: 0 };
-    this.size = size + 'px';
+    this.size = size;
     this.family = family;
     this.color = color;
   };

@@ -1,66 +1,88 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
-    <title>Pong! Made with critters</title>
-  </head>
-  <body>
-    <script src="main.js" charset="utf-8"></script>
-    <script type="text/javascript">
-        var pong = new World(document.body, 'black', 800, 400, 0, 0);
-        pong.start();
-        var p1, p2, ball, p1tp, p2tp;
-        pong.set(p1 = new pong.Rectangle('p1', 50, 200, 10, 100, 'white'));
-        pong.set(p2 = new pong.Rectangle('p2', 750, 150, 10, 100, 'white'));
-        pong.set(ball = new pong.Circle('ball', 400, 200, 10, 'white'));
-        pong.set(p1tp = new pong.Text('p1tp', 200, 50, '0', 40, 'Roboto Mono', 'white'));
-        pong.set(p2tp = new pong.Text('p2tp', 600, 50, '0', 40, 'Roboto Mono', 'white'));
-        pong.set(new pong.Rectangle('line', 400, 0, 10, 400, 'white'))
-        var ballleft = Math.random() >= 0.5;
-        var ballup = Math.random() >= 0.5;
-        var keys = pong.keys;
-        var p1points = 0;
-        var p2points = 0;
-        var ballspeed = 2.5;
-        //setInterval(()=>ball.color = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'][Math.round(Math.random()*5)], 50);
-        pong.update = function() {
-          p1tp.text = p1points;
-          p2tp.text = p2points;
-          ballspeed+=0.0005;
-          if (ballleft) ball.x -= ballspeed;
-          if (!ballleft) ball.x += ballspeed;
-          if (ballup) ball.y -= ballspeed;
-          if (!ballup) ball.y += ballspeed;
-          if (ball.y < 10) ballup = false;
-          if (ball.y > 390) ballup = true;
-          if (ball.x < 10) {
-            p2points++;
-            ball.x = 400;
-            ball.y = 200;
-          }
-          if (ball.x > 790) {
-            p1points++;
-            ball.x = 400;
-            ball.y = 200;
-          }
-          if (pong.collisionWith(ball, p1)) {
-            ballleft = false;
-            ballup = Math.random() >= 0.5;
-          }
-          if (pong.collisionWith(ball, p2)) {
-            ballleft = true;
-            ballup = Math.random() >= 0.5;
-          }
-          if (keys.w || keys.arrowup) p1.y -= 3;
-          if (keys.s || keys.arrowdown) p1.y += 3;
-          if (p1.y < 0) p1.y = 0;
-          if (p1.y > 300) p1.y = 300;
-          if (ball.y <  p2.y + 50 && !ballleft) p2.y -= 3;
-          if (ball.y >  p2.y + 50 && !ballleft) p2.y += 3;
-          if (p2.y < 0) p2.y = 0;
-          if (p2.y > 300) p2.y = 300;
-        };
-    </script>
-  </body>
+
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
+  <title>Pong! Made with critters</title>
+</head>
+
+<body>
+  <div id="game"></div>
+  <input type="checkbox" name="ai" id="ai-checkbox" checked>AI (checked) / 2 Player (unchecked)
+  <script src="main.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    var ai = true;
+    var pong = new World(document.querySelector('#game'), 'black', 800, 400, 0, 0);
+    pong.start();
+    var p1, p2, ball, p1tp, p2tp;
+    pong.set(p1 = new pong.Rectangle('p1', 50, 200, 10, 100, 'white'));
+    pong.set(p2 = new pong.Rectangle('p2', 750, 150, 10, 100, 'white'));
+    pong.set(ball = new pong.Circle('ball', 400, 200, 10, 'white'));
+    pong.set(p1tp = new pong.Text('p1tp', 200, 50, '0', 40, 'Roboto Mono', 'white'));
+    pong.set(p2tp = new pong.Text('p2tp', 600, 50, '0', 40, 'Roboto Mono', 'white'));
+    pong.set(new pong.Rectangle('line', 400, 0, 10, 400, 'white'))
+    var ballleft = Math.random() >= 0.5;
+    var ballup = Math.random() >= 0.5;
+    var keys = pong.keys;
+    var p1points = 0;
+    var p2points = 0;
+    var ballspeed = 2.5;
+    var aiCheckbox = document.querySelector('#ai-checkbox');
+    aiCheckbox.addEventListener("input", function () {
+      ai = aiCheckbox.checked;
+    });
+    //setInterval(()=>ball.color = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'][Math.round(Math.random()*5)], 50);
+    pong.update = function () {
+      p1tp.text = p1points;
+      p2tp.text = p2points;
+      ballspeed += 0.0005;
+      if (ballleft) ball.x -= ballspeed;
+      if (!ballleft) ball.x += ballspeed;
+      if (ballup) ball.y -= ballspeed;
+      if (!ballup) ball.y += ballspeed;
+      if (ball.y < 10) ballup = false;
+      if (ball.y > 390) ballup = true;
+      if (ball.x < 10) {
+        p2points++;
+        ball.x = 400;
+        ball.y = 200;
+      }
+      if (ball.x > 790) {
+        p1points++;
+        ball.x = 400;
+        ball.y = 200;
+      }
+      if (pong.collisionWith(ball, p1)) {
+        ballleft = false;
+        ballup = Math.random() >= 0.5;
+      }
+      if (pong.collisionWith(ball, p2)) {
+        ballleft = true;
+        ballup = Math.random() >= 0.5;
+      }
+
+      //up down controls for player 1
+      if (keys.w) p1.y -= 3;
+      if (keys.s) p1.y += 3;
+
+      //boundaries
+      if (p1.y < 0) p1.y = 0;
+      if (p1.y > 300) p1.y = 300;
+      if (p2.y < 0) p2.y = 0;
+      if (p2.y > 300) p2.y = 300;
+
+      //player 2 stuff (ai/2 player mode)
+      if (ai) {
+        if (ball.y < p2.y + 50 && !ballleft) p2.y -= 3;
+        if (ball.y > p2.y + 50 && !ballleft) p2.y += 3;
+      } else {
+        //up down controlls for player 2
+        if (keys.arrowup) p2.y -= 3;
+        if (keys.arrowdown) p2.y += 3;
+      }
+    };
+  </script>
+</body>
+
 </html>
