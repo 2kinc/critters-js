@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>polygons</title>
+  </head>
+  <body>
+    <script src="main.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      var world = new World(document.body, 'white', 500, 500, 0, 0);
+      world.start();
+      var polly, pollys;
+      world.set(polly = new world.Polygon('yay', 5, 5, [[120, 100], [150, 50], [200, 200], [150, 160], [140, 130]], 'blue'));
+      world.set(pollys = new world.Polygon('yayd', 50, 50, [[120, 100], [150, 50], [200, 200], [150, 160], [140, 130]], 'blue'));
+    </script>
+  </body>
+</html>

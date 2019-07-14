@@ -26,8 +26,6 @@
         world.get('ddd').text = (world.mouse.x+world.cam.x) + ',' + (world.mouse.y+world.cam.y);
         world.get('ddd').x = 50 + world.cam.x;
         world.get('ddd').y = 50 + world.cam.y;
-        player.x = world.mouse.x-30+world.cam.x;
-        player.y = world.mouse.y-30+world.cam.y;
         if (keys.w) world.addForce({y: -4}, player);
         if (keys.a) world.addForce({x: -2}, player);
         if (keys.d) world.addForce({x: 2}, player);

@@ -27,6 +27,30 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
   }
   document.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = e.type = true);
   document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
+  this.Polygon = function(name, x, y, points, color, mass) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.points = points;
+    this.coords = JSON.parse(JSON.stringify(this.points));
+    this.coords.forEach((a, b) => {
+      a[0] += this.x;
+      a[1] += this.y;
+    });
+    this.edges = [];
+    for (i=0;i<points.length;i++) {
+      console.log(this.coords[(i+1)%points.length]);
+      this.edges[i] = [this.coords[i%points.length], this.coords[(i+1)%points.length]];
+    }
+    this.type = 'polygon';
+    if (mass) {
+      this.rigidBody = true;
+      this.gravity = true;
+    }
+    this.mass = mass || 1;
+    this.acceleration = {x:0,y:0};
+    this.color = color;
+  };
   this.Rectangle = function (name, x, y, width, height, color, mass) {
     this.name = name;
     this.x = x;
@@ -87,7 +111,7 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     this.family = family;
     this.color = color;
   };
-  this.mouse = {x:0, y:0};
+  this.mouse = {x:0, y:0, clicked:false};
   that.el.onmousemove = function(e) {
     that.mouse.x = e.clientX;
 	  that.mouse.y = e.clientY;
@@ -103,6 +127,12 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
     };
     object.x += vector.x || 0;
     object.y += vector.y || 0;
+    moving = {
+      right: previous.x < object.x,
+      left: previous.x > object.x,
+      up: previous.y < object.y,
+      down: previous.y > object.y
+    };
     if (object.rigidBody === true) {
       that.objects.forEach(function (obj){
         if (obj != object && obj.rigidBody === true && that.collisionWith(object, obj)) {
@@ -126,6 +156,67 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
   this.set = (...objs) => {objs.forEach(obj=>that.objects.set(obj.name, obj))};  //set the object
   this.get = (name) => { return that.objects.get(name) }; //get the object
   this.update = function () {/*Happens every second*/ };
+  this.drawFrame = function () { //Also happens every second
+    that.context.beginPath();
+    that.context.fillStyle = that.bgcolor;
+    that.context.fillRect(0, 0, that.width, that.height);
+    that.context.fill();
+    that.objects.forEach(function (obj) {
+      if (obj.type == 'circle') {
+        that.context.save();
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+        that.context.fillStyle = obj.color;
+        that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, 6.283185);
+        that.context.fill();
+        that.context.restore();
+      }
+      else if (obj.type == 'rectangle') {
+        that.context.save();
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+        that.context.fillStyle = obj.color;
+        that.context.fillRect(0, 0, obj.width * that.cam.zoom, obj.height * that.cam.zoom);
+        that.context.restore();
+      }
+      else if (obj.type == 'image') {
+        that.context.save();
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+        that.context.scale((obj.flip ? -1 : 1), 1)
+        var image = new Image();
+        image.src = obj.src;
+        that.context.drawImage(image, 0, 0, obj.width * that.cam.zoom, obj.height * that.cam.zoom);
+        that.context.restore();
+      }
+      else if (obj.type == 'text') {
+        that.context.save();
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+        that.context.fillStyle = obj.color;
+        that.context.font = (obj.size * that.cam.zoom) + 'px ' +  obj.family;
+        that.context.fillText(obj.text, 0, 0);
+        that.context.restore();
+      }
+      else if (obj.type == 'polygon') {
+        obj.coords = JSON.parse(JSON.stringify(obj.points));
+        obj.coords.forEach((a, b) => {
+          a[0] += obj.x;
+          a[1] += obj.y;
+        });
+        obj.edges = [];
+        for (i=0;i<obj.points.length;i++) {
+          obj.edges[i] = [obj.coords[i%obj.points.length], obj.coords[i%obj.points.length+1]];
+        }
+        that.context.save();
+        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+        that.context.fillStyle = obj.color;
+        that.context.moveTo(obj.points[0][0] + obj.x, obj.points[0][1] + obj.y);
+        for (var i = 1; i < obj.points.length; i++) {
+          that.context.lineTo(obj.points[i][0] + obj.x, obj.points[i][1] + obj.y);
+        }
+        that.context.closePath();
+        that.context.fill();
+        that.context.restore();
+      }
+    });
+  };
   this.collisionWith = function (obj1, obj2, rlud) {
     rlud = rlud || false;
     if (obj1.type == 'rectangle' && obj2.type == 'rectangle') {
@@ -194,46 +285,6 @@ function World(parent, bgcolor, width, height, camx, camy, gravity, customProper
         //if ()
       }
     }
-  }
-  this.drawFrame = function () { //Also happens every second
-    that.context.beginPath();
-    that.context.fillStyle = that.bgcolor;
-    that.context.fillRect(0, 0, that.width, that.height);
-    that.context.fill();
-    that.objects.forEach(function (obj) {
-      if (obj.type == 'circle') {
-        that.context.save();
-        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-        that.context.fillStyle = obj.color;
-        that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, 6.283185);
-        that.context.fill();
-        that.context.restore();
-      }
-      else if (obj.type == 'rectangle') {
-        that.context.save();
-        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-        that.context.fillStyle = obj.color;
-        that.context.fillRect(0, 0, obj.width * that.cam.zoom, obj.height * that.cam.zoom);
-        that.context.restore();
-      }
-      else if (obj.type == 'image') {
-        that.context.save();
-        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-        that.context.scale((obj.flip ? -1 : 1), 1)
-        var image = new Image();
-        image.src = obj.src;
-        that.context.drawImage(image, 0, 0, obj.width * that.cam.zoom, obj.height * that.cam.zoom);
-        that.context.restore();
-      }
-      else if (obj.type == 'text') {
-        that.context.save();
-        that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-        that.context.fillStyle = obj.color;
-        that.context.font = (obj.size * that.cam.zoom) + 'px ' +  obj.family;
-        that.context.fillText(obj.text, 0, 0);
-        that.context.restore();
-      }
-    });
   }
   this.physics = function () {
     that.objects.forEach(function (obj) {
