@@ -2,9 +2,14 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>FDssf</title>
   </head>
   <body>
-
+    <script src="index.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      var game = new critters.World('blue', 0, 500, 500, 0, 0, 0);
+      var polygon = new critters.Polygon('hi', 0, 0, [new critters.Point(100, 200), new critters.Point(100, 100), new critters.Point(200, 200)], 'red');
+      game.set(polygon);
+    </script>
   </body>
 </html>
