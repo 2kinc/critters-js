@@ -1,4 +1,4 @@
-(function (global){
+(function (global) {
   var module = {
     World: function (bgcolor, parent, width, height, camx, camy, gravity, customprops) {
       //Get everything started
@@ -24,36 +24,39 @@
       this.get = ob => this.objects.get(ob);
       this.$ = this.get;
       this.paused = true;
-      this.update = function() {/*This is for users update (updates every second)*/};
-      this.mainUpdate = function() { //updates every second
+      this.update = function () {/*This is for users update (updates every second)*/ };
+      this.mainUpdate = function () { //updates every second
         that.context.beginPath();
         that.context.fillStyle = that.color;
         that.context.fillRect(0, 0, that.width, that.height);
         that.context.fill();
-        that.objects.forEach(function(obj) {
+        that.objects.forEach(function (obj) {
           that.context.save();
           that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
           that.context.fillStyle = obj.color;
+          that.context.strokeStyle = obj.outlineColor;
           if (obj.type == 'polygon') {
-              obj.edges = [];
-              for (var i = 0; i < obj.points.length; i++) {
-                obj.edges[i] = new module.Vector(obj.points[i % obj.points.length], obj.points[(i + 1) % (obj.points.length)]);
-                var c = ((obj.points[(i + 1) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x)**2 + (obj.points[(i + 1) % (obj.points.length)].y - obj.points[(i  + 2) % (obj.points.length)].y)**2) ** (1/2);
-                var a = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x)**2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y)**2) ** (1/2);
-                var b = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 1) % (obj.points.length)].x)**2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 1) % (obj.points.length)].y)**2) ** (1/2);
-                obj.points[i].angle = (Math.acos((a**2+b**2-c**2)/(2*a*b)))*(180/Math.PI);
-              }
-              that.context.moveTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
-              obj.points.forEach(function(a) {
-                that.context.lineTo(a.x + obj.x, a.y + obj.y);
-              });
-              that.context.fill();
-              that.context.closePath();
+            obj.edges = [];
+            for (var i = 0; i < obj.points.length; i++) {
+              obj.edges[i] = new module.Vector(obj.points[i % obj.points.length], obj.points[(i + 1) % (obj.points.length)]);
+              var c = ((obj.points[(i + 1) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x) ** 2 + (obj.points[(i + 1) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y) ** 2) ** (1 / 2);
+              var a = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x) ** 2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y) ** 2) ** (1 / 2);
+              var b = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 1) % (obj.points.length)].x) ** 2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 1) % (obj.points.length)].y) ** 2) ** (1 / 2);
+              obj.points[i].angle = (Math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))) * (180 / Math.PI);
+            }
+            that.context.moveTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
+            obj.points.forEach(function (a) {
+              that.context.lineTo(a.x + obj.x, a.y + obj.y);
+            });
+            that.context.lineTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
+            that.context.fill();
+            that.context.stroke();
+            that.context.closePath();
           }
           that.context.restore();
         });
       };
-      this.frame = function() {
+      this.frame = function () {
         if (that.paused) return;
         that.update();
         that.mainUpdate();
@@ -71,12 +74,12 @@
         this.x = x || 0;
         this.y = y || 0;
       }
-      static sum (...points){
+      static sum(...points) {
         var x = 0;
         var y = 0;
-        points.forEach(function(point) {
-           x += point.x;
-           y += point.y;//very nice, or should i say, varry nice :}
+        points.forEach(function (point) {
+          x += point.x;
+          y += point.y;//very nice, or should i say, varry nice :}
         });
         return new Point(x, y); //rip water sheep https://www.google.com/search?q=rip+water+sheep&safe=strict&rlz=1C1DKCZ_enUS786US786&source=lnms&tbm=isch&sa=X&ved=0ahUKEwi7pOvhorfjAhWSQc0KHcLLCtkQ_AUIECgB&biw=1280&bih=617#imgrc=w325HGUJ-FvmMM:
       }
@@ -87,9 +90,9 @@
         this.start = start || new module.Point;
         this.end = end || new module.Point;
       }
-      static sum (...vectors) {
+      static sum(...vectors) {
         var result = new Vector;
-        vectors.forEach(function(vector) {
+        vectors.forEach(function (vector) {
           result.start.x += vector.start.x;
           result.start.y += vector.start.y;
           result.end.x += vector.end.x;
@@ -97,10 +100,10 @@
         });
         return result;
       }
-      angle (d) {
+      angle(d) {
         return Math.atan((this.start.y - this.end.y) / (this.start.x - this.end.x)) * (180 / Math.PI);
       }
-      add (vector) {
+      add(vector) {
         this.start.x += vector.start.x;
         this.start.y += vector.start.y;
         this.end.x += vector.end.x;
@@ -109,8 +112,8 @@
       }
     },
     //Polygon constructor
-    Polygon : class Polygon {
-      constructor(name, x, y, points, color, mass) {
+    Polygon: class Polygon {
+      constructor(name, x, y, points, color, mass, customprops) {
         this.name = name;
         this.x = x;
         this.y = y;
@@ -119,6 +122,10 @@
         this.edges = [];
         this.color = color;
         this.mass = mass || 1;
+        this.outlineColor = "transparent";
+        for (var customprop in customprops) {
+          this[customprop] = customprops[customprop];
+        }
       }
     }
   };
