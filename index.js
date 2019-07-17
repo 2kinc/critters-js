@@ -33,8 +33,10 @@
         that.objects.forEach(function (obj) {
           that.context.save();
           that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+          that.context.rotate(obj.rotation * Math.PI / 180);
           that.context.fillStyle = obj.color;
           that.context.strokeStyle = obj.outlineColor;
+          that.context.lineWidth = obj.outlineWidth;
           if (obj.type == 'polygon') {
             obj.edges = [];
             for (var i = 0; i < obj.points.length; i++) {
@@ -120,9 +122,11 @@
         this.type = 'polygon';
         this.points = points;
         this.edges = [];
+        this.rotation = 0;
         this.color = color;
         this.mass = mass || 1;
         this.outlineColor = "transparent";
+        this.outlineWidth = 1;
         for (var customprop in customprops) {
           this[customprop] = customprops[customprop];
         }
