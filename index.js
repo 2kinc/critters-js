@@ -35,9 +35,14 @@
           that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
           that.context.fillStyle = obj.color;
           if (obj.type == 'polygon') {
-              obj.points.forEach(function() {
-
-              });
+              obj.edges = [];
+              for (var i = 0; i < obj.points.length; i++) {
+                obj.edges[i] = new module.Vector(obj.points[i % obj.points.length], obj.points[(i + 1) % (obj.points.length)]);
+                var c = ((obj.points[(i + 1) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x)**2 + (obj.points[(i + 1) % (obj.points.length)].y - obj.points[(i  + 2) % (obj.points.length)].y)**2) ** (1/2);
+                var a = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x)**2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y)**2) ** (1/2);
+                var b = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 1) % (obj.points.length)].x)**2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 1) % (obj.points.length)].y)**2) ** (1/2);
+                obj.points[i].angle = (Math.acos((a**2+b**2-c**2)/(2*a*b)))*(180/Math.PI);
+              }
               that.context.moveTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
               obj.points.forEach(function(a) {
                 that.context.lineTo(a.x + obj.x, a.y + obj.y);
@@ -83,7 +88,7 @@
         this.end = end || new module.Point;
       }
       static sum (...vectors) {
-        var result = new Vector; //no need for parentheses
+        var result = new Vector;
         vectors.forEach(function(vector) {
           result.start.x += vector.start.x;
           result.start.y += vector.start.y;
@@ -91,6 +96,9 @@
           result.end.y += vector.end.y;
         });
         return result;
+      }
+      angle (d) {
+        return Math.atan((this.start.y - this.end.y) / (this.start.x - this.end.x)) * (180 / Math.PI);
       }
       add (vector) {
         this.start.x += vector.start.x;
