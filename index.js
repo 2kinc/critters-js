@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 (function (global){
+  var moduleExports = {
+=======
+(function (global) {
   var module = {
+>>>>>>> 498f0a254a0a4e47e238437ef80a898426f248b4
     World: function (bgcolor, parent, width, height, camx, camy, gravity, customprops) {
       //Get everything started
       var that = this;
@@ -20,40 +25,65 @@
       if (customprops) for (prop in customprops) this[prop] = customprops[prop];
       this.keys = {};
       this.objects = new Map();
-      this.set = ob => this.objects.set(ob.name, ob);
+      this.set = (...obs) => obs.forEach(ob=>this.objects.set(ob.name, ob));
       this.get = ob => this.objects.get(ob);
       this.$ = this.get;
       this.paused = true;
-      this.update = function() {/*This is for users update (updates every second)*/};
-      this.mainUpdate = function() { //updates every second
+      this.update = function () {/*This is for users update (updates every second)*/ };
+      this.mainUpdate = function () { //updates every second
         that.context.beginPath();
         that.context.fillStyle = that.color;
         that.context.fillRect(0, 0, that.width, that.height);
         that.context.fill();
-        that.objects.forEach(function(obj) {
+        that.objects.forEach(function (obj) {
           that.context.save();
           that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+          that.context.rotate(obj.rotation * Math.PI / 180);
           that.context.fillStyle = obj.color;
-          if (obj.type == 'polygon') {
+<<<<<<< HEAD
+          if (obj.type == 'polygon' || obj.type == 'rectangle') {
+              if (obj.type == 'rectangle') obj.points = [new moduleExports.Point(0, 0), new moduleExports.Point(obj.width, 0), new moduleExports.Point(obj.width, obj.height), new moduleExports.Point(0, obj.height)]
               obj.edges = [];
               for (var i = 0; i < obj.points.length; i++) {
-                obj.edges[i] = new module.Vector(obj.points[i % obj.points.length], obj.points[(i + 1) % (obj.points.length)]);
+                obj.edges[i] = new moduleExports.Vector(obj.points[i % obj.points.length], obj.points[(i + 1) % (obj.points.length)]);
                 var c = ((obj.points[(i + 1) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x)**2 + (obj.points[(i + 1) % (obj.points.length)].y - obj.points[(i  + 2) % (obj.points.length)].y)**2) ** (1/2);
                 var a = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x)**2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y)**2) ** (1/2);
                 var b = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 1) % (obj.points.length)].x)**2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 1) % (obj.points.length)].y)**2) ** (1/2);
-                obj.points[i].angle = (Math.acos((a**2+b**2-c**2)/(2*a*b)))*(180/Math.PI);
+                obj.points[i].angle = (Math.acos((a**2+b**2-c**2)/(2*a*b)))*(180/3.1415);
               }
-              that.context.moveTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
-              obj.points.forEach(function(a) {
-                that.context.lineTo(a.x + obj.x, a.y + obj.y);
-              });
+              that.context.moveTo(obj.points[0].x, obj.points[0].y);
+              obj.points.forEach(a => that.context.lineTo(a.x, a.y));
               that.context.fill();
               that.context.closePath();
+          } else if (obj.type == 'circle') {
+            that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, Math.PI * 2);
+            that.context.fill();
+=======
+          that.context.strokeStyle = obj.outlineColor;
+          that.context.lineWidth = obj.outlineWidth;
+          if (obj.type == 'polygon') {
+            obj.edges = [];
+            for (var i = 0; i < obj.points.length; i++) {
+              obj.edges[i] = new module.Vector(obj.points[i % obj.points.length], obj.points[(i + 1) % (obj.points.length)]);
+              var c = ((obj.points[(i + 1) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x) ** 2 + (obj.points[(i + 1) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y) ** 2) ** (1 / 2);
+              var a = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x) ** 2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y) ** 2) ** (1 / 2);
+              var b = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 1) % (obj.points.length)].x) ** 2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 1) % (obj.points.length)].y) ** 2) ** (1 / 2);
+              obj.points[i].angle = (Math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))) * (180 / Math.PI);
+            }
+            that.context.moveTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
+            obj.points.forEach(function (a) {
+              that.context.lineTo(a.x + obj.x, a.y + obj.y);
+            });
+            that.context.lineTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
+            that.context.fill();
+            that.context.stroke();
+            that.context.closePath();
+>>>>>>> 498f0a254a0a4e47e238437ef80a898426f248b4
           }
           that.context.restore();
         });
       };
-      this.frame = function() {
+      this.frame = function () {
         if (that.paused) return;
         that.update();
         that.mainUpdate();
@@ -71,25 +101,31 @@
         this.x = x || 0;
         this.y = y || 0;
       }
-      static sum (...points){
+      static sum(...points) {
         var x = 0;
         var y = 0;
+<<<<<<< HEAD
         points.forEach(function(point) {
            x += point.x;
-           y += point.y;//very nice, or should i say, varry nice :}
+           y += point.y;
+=======
+        points.forEach(function (point) {
+          x += point.x;
+          y += point.y;//very nice, or should i say, varry nice :}
+>>>>>>> 498f0a254a0a4e47e238437ef80a898426f248b4
         });
-        return new Point(x, y); //rip water sheep https://www.google.com/search?q=rip+water+sheep&safe=strict&rlz=1C1DKCZ_enUS786US786&source=lnms&tbm=isch&sa=X&ved=0ahUKEwi7pOvhorfjAhWSQc0KHcLLCtkQ_AUIECgB&biw=1280&bih=617#imgrc=w325HGUJ-FvmMM:
+        return new Point(x, y);
       }
     },
     //Vector constructor
     Vector: class Vector {
       constructor(start, end) {
-        this.start = start || new module.Point;
-        this.end = end || new module.Point;
+        this.start = start || new moduleExports.Point;
+        this.end = end || new moduleExports.Point;
       }
-      static sum (...vectors) {
+      static sum(...vectors) {
         var result = new Vector;
-        vectors.forEach(function(vector) {
+        vectors.forEach(function (vector) {
           result.start.x += vector.start.x;
           result.start.y += vector.start.y;
           result.end.x += vector.end.x;
@@ -97,10 +133,10 @@
         });
         return result;
       }
-      angle (d) {
+      angle(d) {
         return Math.atan((this.start.y - this.end.y) / (this.start.x - this.end.x)) * (180 / Math.PI);
       }
-      add (vector) {
+      add(vector) {
         this.start.x += vector.start.x;
         this.start.y += vector.start.y;
         this.end.x += vector.end.x;
@@ -109,18 +145,52 @@
       }
     },
     //Polygon constructor
-    Polygon : class Polygon {
-      constructor(name, x, y, points, color, mass) {
+    Polygon: class Polygon {
+      constructor(name, x, y, points, color, mass, customprops) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.type = 'polygon';
         this.points = points;
         this.edges = [];
+        this.rotation = 0;
         this.color = color;
         this.mass = mass || 1;
+        this.outlineColor = "transparent";
+        this.outlineWidth = 1;
+        for (var customprop in customprops) {
+          this[customprop] = customprops[customprop];
+        }
+      }
+    },
+    Rectangle : class Rectangle {
+      constructor(name, x, y, width, height, color, mass) {
+        var poly = new moduleExports.Polygon(name, x, y, [
+          new moduleExports.Point(0, 0), new moduleExports.Point(width, 0), new moduleExports.Point(width, height), new moduleExports.Point(0, height)
+        ], color, mass);
+        for (var prop in poly) this[prop] = poly[prop];
+        this.type = 'rectangle';
+        this.width = width;
+        this.height = height;
+      }
+    },
+    Circle : class Circle {
+      constructor (name, x, y, radius, color, mass) {
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.type = 'circle';
+        this.radius = radius;
+        this.color = color;
+        this.mass = mass;
+      }
+    },
+    Collision: function (a, b) {
+      if (a.type == 'polygon' && b.type == 'polygon') {
+        console.log(a.edge);
       }
     }
   };
-  global.critters = global.critters || module;
+  global.critters = global.critters || moduleExports;
 })(this);
+var $C = critters;

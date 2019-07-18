@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+<<<<<<< HEAD
   <head>
     <meta charset="utf-8">
     <title>FDssf</title>
@@ -7,9 +8,33 @@
   <body>
     <script src="index.js" charset="utf-8"></script>
     <script type="text/javascript">
-      var game = new critters.World('blue', 0, 500, 500, 0, 0, 0);
-      var polygon = new critters.Polygon('hi', 0, 0, [new critters.Point(100, 200), new critters.Point(100, 100), new critters.Point(200, 200)], 'red');
-      game.set(polygon);
+      var game = new $C.World('#fff', 0, 500, 500, 0, 0, 0);
+      var polygon = new $C.Polygon('hi', 50, 50, [new $C.Point(100, 100), new $C.Point(175, 150), new $C.Point(150, 250), new $C.Point(50, 250), new $C.Point(25, 150)], 'red');
+      var rectang = new $C.Rectangle('das', 50, 50, 10, 10, 'red');
+      var circlec = new $C.Circle('yey', 300, 300, 5, 'red');
+      game.set(polygon, rectang, circlec);
     </script>
   </body>
 </html>
+=======
+
+<head>
+  <meta charset="utf-8">
+  <title>FDssf</title>
+</head>
+
+<body>
+  <script src="index.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    var game = new critters.World('#161616', 0, 500, 500, 0, 0, 0);
+    var polygon = new critters.Polygon('hi', 100, 100, [new critters.Point(0, 0), new critters.Point(0, 50), new critters.Point(50, 50)], '#262626', undefined, { outlineColor: "white" });
+    game.set(polygon);
+    game.update = function () {
+      polygon.rotation += 2;
+      polygon.rotation = polygon.rotation % 360;
+    }
+  </script>
+</body>
+
+</html>
+>>>>>>> 498f0a254a0a4e47e238437ef80a898426f248b4
