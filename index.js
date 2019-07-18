@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 (function (global){
   var moduleExports = {
-=======
-(function (global) {
-  var module = {
->>>>>>> 498f0a254a0a4e47e238437ef80a898426f248b4
     World: function (bgcolor, parent, width, height, camx, camy, gravity, customprops) {
       //Get everything started
       var that = this;
@@ -39,8 +34,9 @@
           that.context.save();
           that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
           that.context.rotate(obj.rotation * Math.PI / 180);
+          that.context.strokeStyle = obj.outlineColor;
+          that.context.lineWidth = obj.outlineWidth;
           that.context.fillStyle = obj.color;
-<<<<<<< HEAD
           if (obj.type == 'polygon' || obj.type == 'rectangle') {
               if (obj.type == 'rectangle') obj.points = [new moduleExports.Point(0, 0), new moduleExports.Point(obj.width, 0), new moduleExports.Point(obj.width, obj.height), new moduleExports.Point(0, obj.height)]
               obj.edges = [];
@@ -58,29 +54,9 @@
           } else if (obj.type == 'circle') {
             that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, Math.PI * 2);
             that.context.fill();
-=======
-          that.context.strokeStyle = obj.outlineColor;
-          that.context.lineWidth = obj.outlineWidth;
-          if (obj.type == 'polygon') {
-            obj.edges = [];
-            for (var i = 0; i < obj.points.length; i++) {
-              obj.edges[i] = new module.Vector(obj.points[i % obj.points.length], obj.points[(i + 1) % (obj.points.length)]);
-              var c = ((obj.points[(i + 1) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x) ** 2 + (obj.points[(i + 1) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y) ** 2) ** (1 / 2);
-              var a = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 2) % (obj.points.length)].x) ** 2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 2) % (obj.points.length)].y) ** 2) ** (1 / 2);
-              var b = ((obj.points[(i) % (obj.points.length)].x - obj.points[(i + 1) % (obj.points.length)].x) ** 2 + (obj.points[(i) % (obj.points.length)].y - obj.points[(i + 1) % (obj.points.length)].y) ** 2) ** (1 / 2);
-              obj.points[i].angle = (Math.acos((a ** 2 + b ** 2 - c ** 2) / (2 * a * b))) * (180 / Math.PI);
-            }
-            that.context.moveTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
-            obj.points.forEach(function (a) {
-              that.context.lineTo(a.x + obj.x, a.y + obj.y);
-            });
-            that.context.lineTo(obj.points[0].x + obj.x, obj.points[0].y + obj.y);
-            that.context.fill();
-            that.context.stroke();
-            that.context.closePath();
->>>>>>> 498f0a254a0a4e47e238437ef80a898426f248b4
           }
           that.context.restore();
+
         });
       };
       this.frame = function () {
@@ -104,15 +80,9 @@
       static sum(...points) {
         var x = 0;
         var y = 0;
-<<<<<<< HEAD
         points.forEach(function(point) {
            x += point.x;
            y += point.y;
-=======
-        points.forEach(function (point) {
-          x += point.x;
-          y += point.y;//very nice, or should i say, varry nice :}
->>>>>>> 498f0a254a0a4e47e238437ef80a898426f248b4
         });
         return new Point(x, y);
       }
