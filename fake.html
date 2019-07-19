@@ -10,14 +10,15 @@
   <script src="index.js" charset="utf-8"></script>
   <script type="text/javascript">
     var game = new $C.World('#fff', 0, 500, 500, 0, 0, 0);
-    var polygon = new $C.Polygon('hi', 50, 50, [new $C.Point(100, 100), new $C.Point(175, 150), new $C.Point(150, 250), new $C.Point(50, 250), new $C.Point(25, 150)], 'red');
-    var rectang = new $C.Rectangle('das', 50, 50, 10, 10, 'red');
-    var circlec = new $C.Circle('yey', 300, 300, 5, 'red');
-    game.set(polygon, rectang, circlec);
-    game.update = function () {
+    var polygon = new $C.Polygon('hi', 50, 50, [new $C.Vector(100, 100), new $C.Vector(175, 150), new $C.Vector(150, 250), new $C.Vector(50, 250), new $C.Vector(25, 150)], 'red');
+    var triangl = new $C.Polygon('cool', 300, 150, [new $C.Vector(0, 0), new $C.Vector(0, 100), new $C.Vector(100, 100)], 'red');
+    var rectang = new $C.Rectangle('das', 50, 50, 75, 75, 'red');
+    var circlec = new $C.Circle('yey', 300, 300, 37.5, 'red');
+    game.set(polygon, rectang, circlec, triangl);
+    /*game.update = function () {
       polygon.rotation += 2;
       polygon.rotation = polygon.rotation % 360;
-    }
+    }*/
   </script>
 </body>
 
