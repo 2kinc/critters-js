@@ -19,6 +19,8 @@
       this.gravity = gravity;
       if (customprops) for (prop in customprops) this[prop] = customprops[prop];
       this.keys = {};
+      document.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = e.type = true);
+      document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
       this.objects = new Map();
       this.set = (...obs) => obs.forEach(ob=>this.objects.set(ob.name, ob));
       this.get = ob => this.objects.get(ob);
