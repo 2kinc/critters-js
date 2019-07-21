@@ -31,12 +31,6 @@
         that.context.fillRect(0, 0, that.width, that.height);
         that.context.fill();
         that.objects.forEach(function (obj) {
-          that.context.save();
-          that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-          that.context.rotate(obj.rotation * Math.PI / 180);
-          that.context.strokeStyle = obj.outlineColor;
-          that.context.lineWidth = obj.outlineWidth;
-          that.context.fillStyle = obj.color;
           if (obj.type == 'polygon') {
               if (obj.typetemp == 'rectangle') obj.points = [new moduleExports.Vector(0, 0), new moduleExports.Vector(obj.width, 0), new moduleExports.Vector(obj.width, obj.height), new moduleExports.Vector(0, obj.height)]
               obj.edges = [];
@@ -44,15 +38,28 @@
               for (var i = 0; i < oblen; i++) {
                 obj.edges[i] = new moduleExports.Line(obj.points[i % oblen], obj.points[(i + 1) % (oblen)]);
               }
+              that.context.save();
+              that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+              that.context.rotate(obj.rotation * Math.PI / 180);
+              that.context.strokeStyle = obj.outlineColor;
+              that.context.lineWidth = obj.outlineWidth;
               that.context.moveTo(obj.points[0].x, obj.points[0].y);
               obj.points.forEach(a => that.context.lineTo(a.x, a.y));
-              that.context.fill();
               that.context.closePath();
+              that.context.fillStyle = obj.color;
+              that.context.fill();
+              that.context.restore();
           } else if (obj.type == 'circle') {
+            that.context.save();
+            that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+            that.context.rotate(obj.rotation * Math.PI / 180);
+            that.context.strokeStyle = obj.outlineColor;
+            that.context.lineWidth = obj.outlineWidth;
+            that.context.fillStyle = obj.color;
             that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, Math.PI * 2);
             that.context.fill();
+            that.context.restore();
           }
-          that.context.restore();
         });
       };
       this.frame = function () {
@@ -157,10 +164,28 @@
     },
     Collision: function (a, b) {
       if (a.type == 'polygon' && b.type == 'polygon') {
-        slopes = [];
-        a.edges.forEach(function(itm, indx) {
-          console.log(itm.slope());
+        function pointinpolygon(point, vs) {
+          var x = point.x, y = point.y;
+          var inside = false;
+          for (var i=0,j=vs.points.length - 1; i < vs.points.length; j = i++){
+            var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
+            var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
+            var intersect = ((yi > y) != (yj > y))
+              && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+              if (intersect) inside = !inside;
+            }
+            return inside;
+        };
+        var colliding = false;
+        a.points.forEach(pnt=>{
+          if (pointinpolygon(pnt.add({x:a.x,y:a.y}), b)) {colliding = true;}
         });
+        if (colliding) return true;
+        b.points.forEach(pnt=>{
+          if (pointinpolygon(pnt.add({x:b.x,y:b.y}), a)) {colliding = true;}
+        });
+        if (colliding) return true;
+        return false;
       }
     }
   };
