@@ -11,7 +11,19 @@
   <script src="index.js" charset="utf-8"></script>
   <script type="text/javascript">
     var game = new $C.World('#fff', 0, 500, 500, 0, 0, 0);
-    var polygon = new $C.Polygon('hi', 110, 50, [new $C.Vector(100, 100), new $C.Vector(175, 150), new $C.Vector(150, 250), new $C.Vector(50, 250), new $C.Vector(25, 150)], 'blue');
+    var polygon = new $C.Polygon(
+      'hi',
+      50,
+      50,
+      [
+        new $C.Vector(-32, 50),
+        new $C.Vector(-50, -12),
+        new $C.Vector(0, -50),
+        new $C.Vector(50, -12),
+        new $C.Vector(32, 50)
+      ],
+      'red'
+    );
     var triangl = new $C.Polygon('cool', 300, 150, [new $C.Vector(0, 0), new $C.Vector(0, 100), new $C.Vector(100, 100)], 'blue');
     var rectang = new $C.Rectangle('das', 90, 90, 75, 75, 'blue');
     var circlec = new $C.Circle('yey', 300, 300, 37.5, 'blue');
@@ -29,6 +41,7 @@
       if (game.keys.a) {polygon.x -= 3}
       if (game.keys.s) {polygon.y += 3}
       if (game.keys.d) {polygon.x += 3}
+      polygon.rotation += 5;
     }
   </script>
 </body>

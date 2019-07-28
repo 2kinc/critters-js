@@ -21,6 +21,7 @@
       this.keys = {};
       document.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = e.type = true);
       document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
+      document.addEventListener('mouseleave', () => this.keys = {});
       this.objects = new Map();
       this.set = (...obs) => obs.forEach(ob => this.objects.set(ob.name, ob));
       this.get = ob => this.objects.get(ob);
@@ -48,16 +49,14 @@
             }
 
             that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-            that.context.rotate(obj.rotation * Math.PI / 180);
-            that.context.moveTo(obj.points[0].x, obj.points[0].y);
-            obj.points.forEach(a => that.context.lineTo(a.x, a.y));
+            that.context.moveTo(obj.computedPoints[0].x, obj.computedPoints[0].y);
+            obj.computedPoints.forEach(a => that.context.lineTo(a.x, a.y));
             that.context.closePath();
             that.context.fill();
 
           } else if (obj.type == 'circle') {
 
             that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-            that.context.rotate(obj.rotation * Math.PI / 180);
 
             that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, Math.PI * 2);
             that.context.fill();
@@ -97,6 +96,14 @@
       }
       add(vector) {
         return moduleExports.Vector.sum(this, vector);
+      }
+      static rotateAroundOrigin(vector, angle) {
+        var radians = (Math.PI / 180) * angle,
+          cos = Math.cos(radians),
+          sin = Math.sin(radians),
+          nx = (cos * vector.x) - (sin * vector.y),
+          ny = (cos * vector.y) + (sin * vector.x);
+        return new Vector(nx, ny);
       }
     },
     //Line constructor
@@ -151,6 +158,16 @@
           this[customprop] = customprops[customprop];
         }
       }
+
+      get computedPoints() {
+        var points = [];
+        var that = this;
+        this.points.forEach(function (point) {
+          var newPoint = moduleExports.Vector.rotateAroundOrigin(point, that.rotation);
+          points.push(newPoint);
+        });
+        return points;
+      }
     },
     Rectangle: class Rectangle {
       constructor(name, x, y, width, height, color, mass) {
@@ -161,6 +178,16 @@
         this.typetemp = 'rectangle';
         this.width = width;
         this.height = height;
+      }
+
+      get computedPoints() {
+        var points = [];
+        var that = this;
+        this.points.forEach(function (point) {
+          var newPoint = moduleExports.Vector.rotateAroundOrigin(point, that.rotation);
+          points.push(newPoint);
+        });
+        return points;
       }
     },
     Circle: class Circle {
@@ -177,11 +204,12 @@
     Collision: function (a, b) {
       if (a.type == 'polygon' && b.type == 'polygon') {
         function pointinpolygon(point, vs) {
+          var points = vs.computedPoints;
           var x = point.x, y = point.y;
           var inside = false;
-          for (var i = 0, j = vs.points.length - 1; i < vs.points.length; j = i++) {
-            var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
-            var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
+          for (var i = 0, j = points.length - 1; i < points.length; j = i++) {
+            var xi = points[i].x + vs.x, yi = points[i].y + vs.y;
+            var xj = points[j].x + vs.x, yj = points[j].y + vs.y;
             var intersect = ((yi > y) != (yj > y))
               && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
             if (intersect) inside = !inside;
@@ -189,11 +217,11 @@
           return inside;
         };
         var colliding = false;
-        a.points.forEach(pnt => {
+        a.computedPoints.forEach(pnt => {
           if (pointinpolygon(pnt.add({ x: a.x, y: a.y }), b)) { colliding = true; }
         });
         if (colliding) return true;
-        b.points.forEach(pnt => {
+        b.computedPoints.forEach(pnt => {
           if (pointinpolygon(pnt.add({ x: b.x, y: b.y }), a)) { colliding = true; }
         });
         if (colliding) return true;
