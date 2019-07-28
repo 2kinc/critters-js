@@ -32,8 +32,8 @@
       if ($C.Collision(polygon, rectang)) {rectang.color = 'red'; polygon.color = 'red';}
       if ($C.Collision(polygon, circlec)) {circlec.color = 'red'; polygon.color = 'red';}
       if (game.keys.w) {
-        polygon.y -= Math.cos((polygon.rotation*(Math.PI/180)));
-        polygon.x += Math.sin((polygon.rotation*(Math.PI/180)));
+        polygon.y -= Math.cos((polygon.rotation*(Math.PI/180))) * 5;
+        polygon.x += Math.sin((polygon.rotation*(Math.PI/180))) * 5;
       }
       if (game.keys.a) {polygon.rotation -= 1}
       if (game.keys.s) {
