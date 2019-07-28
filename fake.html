@@ -37,8 +37,8 @@
       }
       if (game.keys.a) {polygon.rotation -= 1}
       if (game.keys.s) {
-        polygon.y += Math.cos((polygon.rotation*(Math.PI/180)));
-        polygon.x -= Math.sin((polygon.rotation*(Math.PI/180)));
+        polygon.y += Math.cos((polygon.rotation*(Math.PI/180))) * 3;
+        polygon.x -= Math.sin((polygon.rotation*(Math.PI/180))) * 3;
       }
       if (game.keys.d) {polygon.rotation += 1}
     }
