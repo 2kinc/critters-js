@@ -11,19 +11,24 @@
   <script src="index.js" charset="utf-8"></script>
   <script type="text/javascript">
     var game = new $C.World('#fff', 0, 500, 500, 0, 0, 0);
-    var polygon = new $C.Polygon('hi', 50, 50, [new $C.Vector(100, 100), new $C.Vector(175, 150), new $C.Vector(150, 250), new $C.Vector(50, 250), new $C.Vector(25, 150)], 'red');
+    var polygon = new $C.Polygon('hi', 110, 50, [new $C.Vector(100, 100), new $C.Vector(175, 150), new $C.Vector(150, 250), new $C.Vector(50, 250), new $C.Vector(25, 150)], 'blue');
     var triangl = new $C.Polygon('cool', 300, 150, [new $C.Vector(0, 0), new $C.Vector(0, 100), new $C.Vector(100, 100)], 'blue');
-    var rectang = new $C.Rectangle('das', 50, 50, 75, 75, 'red');
-    var circlec = new $C.Circle('yey', 300, 300, 37.5, 'red');
+    var rectang = new $C.Rectangle('das', 90, 90, 75, 75, 'blue');
+    var circlec = new $C.Circle('yey', 300, 300, 37.5, 'blue');
+    var circlea = new $C.Circle('ddaf', 300, 260, 37.5, 'blue');
     game.set(polygon, rectang, circlec, triangl);
     game.update = function() {
-      if ($C.Collision(polygon, triangl)) {
-        document.querySelector('p').innerHTML = 'ow';
-      } else {document.querySelector('p').innerHTML = 'yey';}
-      if (game.keys.w) {polygon.y -= 5}
-      if (game.keys.a) {polygon.x -= 5}
-      if (game.keys.s) {polygon.y += 5}
-      if (game.keys.d) {polygon.x += 5}
+      rectang.color = 'blue';
+      triangl.color = 'blue';
+      polygon.color = 'blue';
+      circlec.color = 'blue';
+      if ($C.Collision(polygon, triangl)) {triangl.color = 'red'; polygon.color = 'red';}
+      if ($C.Collision(polygon, rectang)) {rectang.color = 'red'; polygon.color = 'red';}
+      if ($C.Collision(polygon, circlec)) {circlec.color = 'red'; polygon.color = 'red';}
+      if (game.keys.w) {polygon.y -= 3}
+      if (game.keys.a) {polygon.x -= 3}
+      if (game.keys.s) {polygon.y += 3}
+      if (game.keys.d) {polygon.x += 3}
     }
   </script>
 </body>

@@ -32,10 +32,10 @@
         that.context.fillStyle = that.color;
         that.context.fillRect(0, 0, that.width, that.height);
         that.objects.forEach(function (obj) {
-
+          that.context.beginPath();
           that.context.save();
 
-          that.context.strokeStyle = obj.outlineColor;
+          that.context.strokeStyle = obj.outlineColor || obj.color;
           that.context.lineWidth = obj.outlineWidth;
           that.context.fillStyle = obj.color;
 
@@ -55,7 +55,7 @@
             that.context.fill();
 
           } else if (obj.type == 'circle') {
-            
+
             that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
             that.context.rotate(obj.rotation * Math.PI / 180);
 
@@ -125,11 +125,12 @@
         return Math.atan(this.slope()) * (180 / Math.PI);
       }
       add(line) {
-        this.start.x += line.start.x;
-        this.start.y += line.start.y;
-        this.end.x += line.end.x;
-        this.end.y += line.end.y;
-        return this;
+        var result = JSON.parse(JSON.stringify(this));
+        result.start.x += line.start.x;
+        result.start.y += line.start.y;
+        result.end.x += line.end.x;
+        result.end.y += line.end.y;
+        return result;
       }
     },
     //Polygon constructor
@@ -197,6 +198,83 @@
         });
         if (colliding) return true;
         return false;
+      }
+      if (a.type == 'circle' && b.type == 'polygon') {
+        function pointinpolygon(point, vs) {
+          var x = point.x, y = point.y;
+          var inside = false;
+          for (var i = 0, j = vs.points.length - 1; i < vs.points.length; j = i++) {
+            var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
+            var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
+            var intersect = ((yi > y) != (yj > y))
+              && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+          }
+          return inside;
+        };
+        function lineCircle(line, circle) {
+          var A = line.start;
+          var B = line.end;
+          var C = {x: circle.x, y: circle.y};
+          var radius = circle.radius;
+          var dist;
+          const v1x = B.x - A.x;
+          const v1y = B.y - A.y;
+          const v2x = C.x - A.x;
+          const v2y = C.y - A.y;
+          const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
+          if(u >= 0 && u <= 1){
+              dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+          } else {
+              dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+          }
+          return dist < radius ** 2;
+        }
+        if (pointinpolygon({x:a.x, y:a.y}, b)) return true;
+        for (var i = 0; i < b.edges.length; i++) {
+          if (lineCircle(b.edges[i].add({start:{x:b.x, y:b.y}, end:{x:b.x, y:b.y}}), a)) return true;
+        };
+        return false;
+      }
+      if (a.type == 'polygon' && b.type == 'circle') {
+        function pointinpolygon(point, vs) {
+          var x = point.x, y = point.y;
+          var inside = false;
+          for (var i = 0, j = vs.points.length - 1; i < vs.points.length; j = i++) {
+            var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
+            var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
+            var intersect = ((yi > y) != (yj > y))
+              && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+          }
+          return inside;
+        };
+        function lineCircle(line, circle) {
+          var A = line.start;
+          var B = line.end;
+          var C = {x: circle.x, y: circle.y};
+          var radius = circle.radius;
+          var dist;
+          const v1x = B.x - A.x;
+          const v1y = B.y - A.y;
+          const v2x = C.x - A.x;
+          const v2y = C.y - A.y;
+          const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
+          if(u >= 0 && u <= 1){
+              dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+          } else {
+              dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+          }
+          return dist < radius ** 2;
+        }
+        if (pointinpolygon({x:b.x, y:b.y}, a)) return true;
+        for (var i = 0; i < a.edges.length; i++) {
+          if (lineCircle(a.edges[i].add({start:{x:a.x, y:a.y}, end:{x:a.x, y:a.y}}), b)) return true;
+        };
+        return false;
+      }
+      if (a.type == 'circle' && b.type == 'circle') {
+        return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5 < a.radius + b.radius;
       }
     }
   };
