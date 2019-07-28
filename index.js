@@ -1,4 +1,4 @@
-(function (global){
+(function (global) {
   var moduleExports = {
     World: function (bgcolor, parent, width, height, camx, camy, gravity, customprops) {
       //Get everything started
@@ -22,46 +22,50 @@
       document.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = e.type = true);
       document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
       this.objects = new Map();
-      this.set = (...obs) => obs.forEach(ob=>this.objects.set(ob.name, ob));
+      this.set = (...obs) => obs.forEach(ob => this.objects.set(ob.name, ob));
       this.get = ob => this.objects.get(ob);
       this.$ = this.get;
       this.paused = true;
-      this.update = function () {/*This is for users update (updates every second)*/ };
-      this.mainUpdate = function () { //updates every second
+      this.update = function () {/*This is for users update (updates every frame)*/ };
+      this.mainUpdate = function () { //updates every frame
         that.context.beginPath();
         that.context.fillStyle = that.color;
         that.context.fillRect(0, 0, that.width, that.height);
-        that.context.fill();
         that.objects.forEach(function (obj) {
+
+          that.context.save();
+
+          that.context.strokeStyle = obj.outlineColor;
+          that.context.lineWidth = obj.outlineWidth;
+          that.context.fillStyle = obj.color;
+
           if (obj.type == 'polygon') {
-              if (obj.typetemp == 'rectangle') obj.points = [new moduleExports.Vector(0, 0), new moduleExports.Vector(obj.width, 0), new moduleExports.Vector(obj.width, obj.height), new moduleExports.Vector(0, obj.height)]
-              obj.edges = [];
-              var oblen = obj.points.length;
-              for (var i = 0; i < oblen; i++) {
-                obj.edges[i] = new moduleExports.Line(obj.points[i % oblen], obj.points[(i + 1) % (oblen)]);
-              }
-              that.context.save();
-              that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
-              that.context.rotate(obj.rotation * Math.PI / 180);
-              that.context.strokeStyle = obj.outlineColor;
-              that.context.lineWidth = obj.outlineWidth;
-              that.context.moveTo(obj.points[0].x, obj.points[0].y);
-              obj.points.forEach(a => that.context.lineTo(a.x, a.y));
-              that.context.closePath();
-              that.context.fillStyle = obj.color;
-              that.context.fill();
-              that.context.restore();
-          } else if (obj.type == 'circle') {
-            that.context.save();
+            if (obj.typetemp == 'rectangle') obj.points = [new moduleExports.Vector(0, 0), new moduleExports.Vector(obj.width, 0), new moduleExports.Vector(obj.width, obj.height), new moduleExports.Vector(0, obj.height)];
+            obj.edges = [];
+            var oblen = obj.points.length;
+            for (var i = 0; i < oblen; i++) {
+              obj.edges[i] = new moduleExports.Line(obj.points[i % oblen], obj.points[(i + 1) % (oblen)]);
+            }
+
             that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
             that.context.rotate(obj.rotation * Math.PI / 180);
-            that.context.strokeStyle = obj.outlineColor;
-            that.context.lineWidth = obj.outlineWidth;
-            that.context.fillStyle = obj.color;
+            that.context.moveTo(obj.points[0].x, obj.points[0].y);
+            obj.points.forEach(a => that.context.lineTo(a.x, a.y));
+            that.context.closePath();
+            that.context.fill();
+
+          } else if (obj.type == 'circle') {
+            
+            that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+            that.context.rotate(obj.rotation * Math.PI / 180);
+
             that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, Math.PI * 2);
             that.context.fill();
-            that.context.restore();
+
           }
+
+          that.context.restore();
+
         });
       };
       this.frame = function () {
@@ -82,17 +86,17 @@
         this.x = x || 0;
         this.y = y || 0;
       }
-      sum(...vectors) {
+      static sum(...vectors) {
         var x = 0;
         var y = 0;
-        vectors.forEach(function(vector) {
-           x += vector.x;
-           y += vector.y;
+        vectors.forEach(function (vector) {
+          x += vector.x;
+          y += vector.y;
         });
         return new Vector(x, y);
       }
       add(vector) {
-        return this.sum(this, vector);
+        return moduleExports.Vector.sum(this, vector);
       }
     },
     //Line constructor
@@ -100,7 +104,8 @@
       constructor(start, end) {
         this.start = start || new moduleExports.Vector;
         this.end = end || new moduleExports.Vector;
-      } static sum(...lines) {
+      }
+      static sum(...lines) {
         var result = new Line;
         lines.forEach(function (line) {
           result.start.x += line.start.x;
@@ -109,13 +114,17 @@
           result.end.y += line.end.y;
         });
         return result;
-      } dist() {
+      }
+      dist() {
         return 'hi';//(this.start.)
-      } slope() {
+      }
+      slope() {
         return -(this.start.y - this.end.y) / (this.start.x - this.end.x);
-      } angle() {
+      }
+      angle() {
         return Math.atan(this.slope()) * (180 / Math.PI);
-      } add(line) {
+      }
+      add(line) {
         this.start.x += line.start.x;
         this.start.y += line.start.y;
         this.end.x += line.end.x;
@@ -142,7 +151,7 @@
         }
       }
     },
-    Rectangle : class Rectangle {
+    Rectangle: class Rectangle {
       constructor(name, x, y, width, height, color, mass) {
         var poly = new moduleExports.Polygon(name, x, y, [
           new moduleExports.Vector(0, 0), new moduleExports.Vector(width, 0), new moduleExports.Vector(width, height), new moduleExports.Vector(0, height)
@@ -153,8 +162,8 @@
         this.height = height;
       }
     },
-    Circle : class Circle {
-      constructor (name, x, y, radius, color, mass) {
+    Circle: class Circle {
+      constructor(name, x, y, radius, color, mass) {
         this.name = name;
         this.x = x;
         this.y = y;
@@ -169,22 +178,22 @@
         function pointinpolygon(point, vs) {
           var x = point.x, y = point.y;
           var inside = false;
-          for (var i=0,j=vs.points.length - 1; i < vs.points.length; j = i++){
+          for (var i = 0, j = vs.points.length - 1; i < vs.points.length; j = i++) {
             var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
             var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
             var intersect = ((yi > y) != (yj > y))
               && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-              if (intersect) inside = !inside;
-            }
-            return inside;
+            if (intersect) inside = !inside;
+          }
+          return inside;
         };
         var colliding = false;
-        a.points.forEach(pnt=>{
-          if (pointinpolygon(pnt.add({x:a.x,y:a.y}), b)) {colliding = true;}
+        a.points.forEach(pnt => {
+          if (pointinpolygon(pnt.add({ x: a.x, y: a.y }), b)) { colliding = true; }
         });
         if (colliding) return true;
-        b.points.forEach(pnt=>{
-          if (pointinpolygon(pnt.add({x:b.x,y:b.y}), a)) {colliding = true;}
+        b.points.forEach(pnt => {
+          if (pointinpolygon(pnt.add({ x: b.x, y: b.y }), a)) { colliding = true; }
         });
         if (colliding) return true;
         return false;
