@@ -22,6 +22,7 @@
       document.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = e.type = true);
       document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
       document.addEventListener('mouseleave', () => this.keys = {});
+      document.addEventListener('blur', () => this.keys = {});
       this.objects = new Map();
       this.set = (...obs) => obs.forEach(ob => this.objects.set(ob.name, ob));
       this.get = ob => this.objects.get(ob);
@@ -43,9 +44,9 @@
           if (obj.type == 'polygon') {
             if (obj.typetemp == 'rectangle') obj.points = [new moduleExports.Vector(0, 0), new moduleExports.Vector(obj.width, 0), new moduleExports.Vector(obj.width, obj.height), new moduleExports.Vector(0, obj.height)];
             obj.edges = [];
-            var oblen = obj.points.length;
+            var oblen = obj.computedPoints.length;
             for (var i = 0; i < oblen; i++) {
-              obj.edges[i] = new moduleExports.Line(obj.points[i % oblen], obj.points[(i + 1) % (oblen)]);
+              obj.edges[i] = new moduleExports.Line(obj.computedPoints[i % oblen], obj.computedPoints[(i + 1) % (oblen)]);
             }
 
             that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
