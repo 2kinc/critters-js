@@ -18,29 +18,62 @@
       new $C.Vector(30, 40),
       new $C.Vector(48, -16)
     ],'red');
-    var triangl = new $C.Polygon('cool', 300, 150, [new $C.Vector(0, 0), new $C.Vector(0, 100), new $C.Vector(100, 100)], 'blue');
+    var triangl = new $C.Polygon('cool', 300, 150, [new $C.Vector(-35, -65), new $C.Vector(-35, 35), new $C.Vector(65, 35)], 'blue');
     var rectang = new $C.Rectangle('das', 90, 90, 75, 75, 'blue');
     var circlec = new $C.Circle('yey', 300, 300, 37.5, 'blue');
     var circlea = new $C.Circle('ddaf', 300, 260, 37.5, 'blue');
     game.set(polygon, rectang, circlec, triangl);
+    function pointinpolygon(point, vs) {
+      var x = point.x, y = point.y;
+      var inside = false;
+      for (var i = 0, j = vs.points.length - 1; i < vs.points.length; j = i++) {
+        var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
+        var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
+        var intersect = ((yi > y) != (yj > y))
+          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    };
+    function pointInCircle(x, y, cx, cy, radius) {
+      var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
+      return distancesquared <= radius * radius;
+    }
+    var selectshape, seloffx, seloffy;
     game.update = function() {
       rectang.color = 'blue';
       triangl.color = 'blue';
       polygon.color = 'blue';
       circlec.color = 'blue';
-      if ($C.Collision(polygon, triangl)) {triangl.color = 'red'; polygon.color = 'red';}
-      if ($C.Collision(polygon, rectang)) {rectang.color = 'red'; polygon.color = 'red';}
-      if ($C.Collision(polygon, circlec)) {circlec.color = 'red'; polygon.color = 'red';}
-      if (game.keys.w) {
-        polygon.y -= Math.cos((polygon.rotation*(Math.PI/180)));
-        polygon.x += Math.sin((polygon.rotation*(Math.PI/180)));
+      if ($C.Collision(polygon, triangl) || $C.Collision(rectang, triangl) || $C.Collision(circlec, triangl)) {
+        triangl.color = 'red';
+      } if ($C.Collision(polygon, circlec) || $C.Collision(rectang, circlec) || $C.Collision(triangl, circlec)) {
+        circlec.color = 'red';
+      } if ($C.Collision(polygon, rectang) || $C.Collision(triangl, rectang) || $C.Collision(circlec, rectang)) {
+        rectang.color = 'red';
+      } if ($C.Collision(triangl, polygon) || $C.Collision(rectang, polygon) || $C.Collision(circlec, polygon)) {
+        polygon.color = 'red';
       }
-      if (game.keys.a) {polygon.rotation -= 1}
-      if (game.keys.s) {
-        polygon.y += Math.cos((polygon.rotation*(Math.PI/180)));
-        polygon.x -= Math.sin((polygon.rotation*(Math.PI/180)));
+      selectshape = undefined;
+      seloffx = undefined;
+      seloffy = undefined;
+      if (this.mouse.clicked) {
+        this.objects.forEach(function(obj) {
+          if (obj.type == 'polygon') {
+            if (pointinpolygon({x:game.mouse.x, y:game.mouse.y}, obj)) {
+              selectshape = obj;
+            }
+          } else if (obj.type == 'circle') {
+            if (pointInCircle(game.mouse.x, game.mouse.y, obj.x, obj.y, obj.radius)) {
+              selectshape = obj;
+            }
+          }
+        });
       }
-      if (game.keys.d) {polygon.rotation += 1}
+      if (selectshape != undefined) {
+        selectshape.x = this.mouse.x;
+        selectshape.y = this.mouse.y;
+      }
     }
   </script>
 </body>

@@ -23,6 +23,11 @@
       document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
       document.addEventListener('mouseleave', () => this.keys = {});
       document.addEventListener('blur', () => this.keys = {});
+      this.mouse = new moduleExports.Vector(0, 0);
+      this.mouse.clicked = false;
+      this.el.addEventListener('mousemove', e => { this.mouse.x = e.clientX; this.mouse.y = e.clientY });
+      this.el.addEventListener('mousedown', e => this.mouse.clicked = true);
+      this.el.addEventListener('mouseup', e => this.mouse.clicked = false);
       this.objects = new Map();
       this.set = (...obs) => obs.forEach(ob => this.objects.set(ob.name, ob));
       this.get = ob => this.objects.get(ob);
@@ -42,7 +47,7 @@
           that.context.fillStyle = obj.color;
 
           if (obj.type == 'polygon') {
-            if (obj.typetemp == 'rectangle') obj.points = [new moduleExports.Vector(0, 0), new moduleExports.Vector(obj.width, 0), new moduleExports.Vector(obj.width, obj.height), new moduleExports.Vector(0, obj.height)];
+            if (obj.typetemp == 'rectangle') obj.points = [new moduleExports.Vector(-obj.width/2, -obj.height/2), new moduleExports.Vector(obj.width/2, -obj.height/2), new moduleExports.Vector(obj.width/2, obj.height/2), new moduleExports.Vector(-obj.width/2, obj.height/2)];
             obj.edges = [];
             var oblen = obj.computedPoints.length;
             for (var i = 0; i < oblen; i++) {
@@ -68,10 +73,19 @@
 
         });
       };
+      this.physicsUpdate = function() {
+        that.objects.forEach(function (obj) {
+          obj.x += obj.acceleration.x;
+          obj.y += obj.acceleration.y;
+          obj.acceleration.x *= 0.9;
+          obj.acceleration.y *= 0.9;
+        });
+      };
       this.frame = function () {
         if (that.paused) return;
         that.update();
         that.mainUpdate();
+        that.physicsUpdate();
         requestAnimationFrame(that.frame);
       };
       (this.start = () => {
@@ -123,14 +137,11 @@
         });
         return result;
       }
-      dist() {
-        return 'hi';//(this.start.)
-      }
-      slope() {
+      get slope() {
         return -(this.start.y - this.end.y) / (this.start.x - this.end.x);
       }
-      angle() {
-        return Math.atan(this.slope()) * (180 / Math.PI);
+      get angle() {
+        return Math.atan(-(this.start.y - this.end.y) / (this.start.x - this.end.x)) * (180 / Math.PI);
       }
       add(line) {
         var result = JSON.parse(JSON.stringify(this));
@@ -153,13 +164,13 @@
         this.rotation = 0;
         this.color = color;
         this.mass = mass || 1;
+        this.acceleration = { x: 0, y: 0 };
         this.outlineColor = "transparent";
         this.outlineWidth = 1;
         for (var customprop in customprops) {
           this[customprop] = customprops[customprop];
         }
       }
-
       get computedPoints() {
         var points = [];
         var that = this;
@@ -168,6 +179,29 @@
           points.push(newPoint);
         });
         return points;
+      } addForce (force) {
+        this.acceleration.x += (force.x / (this.mass || 1)) || 0;
+        this.acceleration.y += (force.y / (this.mass || 1)) || 0;
+      } up(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.y -= d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.x += d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } down(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.y += d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.x -= d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } right(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.x += d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.y -= d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } left(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.x -= d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.y += d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
       }
     },
     Rectangle: class Rectangle {
@@ -189,6 +223,29 @@
           points.push(newPoint);
         });
         return points;
+      } addForce (force) {
+        this.acceleration.x += (force.x / (this.mass || 1)) || 0;
+        this.acceleration.y += (force.y / (this.mass || 1)) || 0;
+      } up(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.y -= d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.x += d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } down(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.y += d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.x -= d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } right(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.x += d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.y -= d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } left(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.x -= d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.y += d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
       }
     },
     Circle: class Circle {
@@ -197,9 +254,33 @@
         this.x = x;
         this.y = y;
         this.type = 'circle';
+        this.acceleration = { x: 0, y: 0 };
         this.radius = radius;
         this.color = color;
         this.mass = mass;
+      } addForce (force) {
+        this.acceleration.x += (force.x / (this.mass || 1)) || 0;
+        this.acceleration.y += (force.y / (this.mass || 1)) || 0;
+      } up(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.y -= d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.x += d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } down(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.y += d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.x -= d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } right(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.x += d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.y -= d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
+      } left(d) {
+        var vec = new moduleExports.Vector(0, 0);
+        vec.x -= d * Math.cos((this.rotation*(Math.PI/180)));
+        vec.y += d * Math.sin((this.rotation*(Math.PI/180)));
+        this.addForce(vec);
       }
     },
     Collision: function (a, b) {
