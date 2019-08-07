@@ -25,7 +25,7 @@
       document.addEventListener('blur', () => this.keys = {});
       this.mouse = new moduleExports.Vector(0, 0);
       this.mouse.clicked = false;
-      this.el.addEventListener('mousemove', e => { this.mouse.x = e.clientX; this.mouse.y = e.clientY });
+      this.el.addEventListener('mousemove', e => { this.mouse.x = e.clientX - this.el.getBoundingClientRect().left; this.mouse.y = e.clientY - this.el.getBoundingClientRect().top; });
       this.el.addEventListener('mousedown', e => this.mouse.clicked = true);
       this.el.addEventListener('mouseup', e => this.mouse.clicked = false);
       this.objects = new Map();
@@ -75,10 +75,22 @@
       };
       this.physicsUpdate = function() {
         that.objects.forEach(function (obj) {
+          previous = {x:obj.x, y:obj.y};
           obj.x += obj.acceleration.x;
           obj.y += obj.acceleration.y;
           obj.acceleration.x *= 0.9;
           obj.acceleration.y *= 0.9;
+          if (obj.gravity) obj.addForce({x:0, y:1.1})
+          that.objects.forEach(function (object) {
+            if (obj != object && moduleExports.Collision(object, obj)) {
+              obj.x = previous.x;
+              obj.y = previous.y;
+              dx = obj.acceleration.x;
+              dy = obj.acceleration.y;
+              if (!object.static) object.addForce({x:dx, y:dy});
+              if (!obj.static) obj.addForce({x:-dx, y:-dy});
+            }
+          });
         });
       };
       this.frame = function () {
@@ -100,6 +112,7 @@
         this.x = x || 0;
         this.y = y || 0;
       }
+      get type () {return 'vector'}
       static sum(...vectors) {
         var x = 0;
         var y = 0;
@@ -137,6 +150,7 @@
         });
         return result;
       }
+      get type () {return 'line'}
       get slope() {
         return -(this.start.y - this.end.y) / (this.start.x - this.end.x);
       }
@@ -159,6 +173,13 @@
         this.x = x;
         this.y = y;
         this.type = 'polygon';
+        if (typeof points == 'string') {
+          var d = [];
+          points.split(' ').forEach(function (itm) {
+	           d.push(new moduleExports.Vector(Number(itm.split(',')[0]), Number(itm.split(',')[1])))
+          });
+          points = d;
+        }
         this.points = points;
         this.edges = [];
         this.rotation = 0;
@@ -170,6 +191,34 @@
         for (var customprop in customprops) {
           this[customprop] = customprops[customprop];
         }
+      }
+      get minx () {
+        var min = Infinity;
+        this.points.forEach(function(itm) {
+          if (min > itm.x) min = itm.x;
+        });
+        return min + this.x;
+      }
+      get miny () {
+        var min = Infinity;
+        this.points.forEach(function(itm) {
+          if (min > itm.y) min = itm.y;
+        });
+        return min + this.y;
+      }
+      get maxx () {
+        var max = 0;
+        this.points.forEach(function(itm) {
+          if (max < itm.x) max = itm.x;
+        });
+        return max + this.x;
+      }
+      get maxy () {
+        var max = 0;
+        this.points.forEach(function(itm) {
+          if (max < itm.y) max = itm.y;
+        });
+        return max + this.y;
       }
       get computedPoints() {
         var points = [];
@@ -214,7 +263,34 @@
         this.width = width;
         this.height = height;
       }
-
+      get minx () {
+        var min = Infinity;
+        this.points.forEach(function(itm) {
+          if (min > itm.x) min = itm.x;
+        });
+        return min + this.x;
+      }
+      get miny () {
+        var min = Infinity;
+        this.points.forEach(function(itm) {
+          if (min > itm.y) min = itm.y;
+        });
+        return min + this.y;
+      }
+      get maxx () {
+        var max = 0;
+        this.points.forEach(function(itm) {
+          if (max < itm.x) max = itm.x;
+        });
+        return max + this.x;
+      }
+      get maxy () {
+        var max = 0;
+        this.points.forEach(function(itm) {
+          if (max < itm.y) max = itm.y;
+        });
+        return max + this.y;
+      }
       get computedPoints() {
         var points = [];
         var that = this;
@@ -284,19 +360,107 @@
       }
     },
     Collision: function (a, b) {
+      if (a.type == 'line' && b.type == 'line') {
+        var ap = a.start.x, bp = a.start.y, c = a.end.x, d = a.end.y, p = b.start.x, q = b.start.y, r = b.end.x, s = b.end.y, det, gamma, lambda;
+        det = (c - ap) * (s - q) - (r - p) * (d - bp);
+        if (det === 0) {
+          return 'hi';
+        } else {
+          lambda = ((s - q) * (r - ap) + (p - r) * (s - bp)) / det;
+          gamma = ((bp - d) * (r - ap) + (c - ap) * (s - bp)) / det;
+          return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+        }
+      }
+      if (a.type == 'vector' && b.type == 'polygon') {
+        var points = b.computedPoints;
+        var x = a.x, y = a.y;
+        var inside = false;
+        for (var i = 0, j = points.length - 1; i < points.length; j = i++) {
+          var xi = points[i].x + b.x, yi = points[i].y + b.y;
+          var xj = points[j].x + b.x, yj = points[j].y + b.y;
+          var intersect = ((yi > y) != (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+          if (intersect) inside = !inside;
+        }
+        return inside;
+      }
+      if (b.type == 'vector' && a.type == 'polygon') {
+        var points = a.computedPoints;
+        var x = b.x, y = b.y;
+        var inside = false;
+        for (var i = 0, j = points.length - 1; i < points.length; j = i++) {
+          var xi = points[i].x + a.x, yi = points[i].y + a.y;
+          var xj = points[j].x + a.x, yj = points[j].y + a.y;
+          var intersect = ((yi > y) != (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+          if (intersect) inside = !inside;
+        }
+        return inside;
+      }
+      if (a.type == 'vector' && b.type == 'circle') {
+        return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) <= b.radius ** 2;
+      }
+      if (b.type == 'vector' && a.type == 'circle') {
+        return ((b.x - a.x) ** 2 + (b.y - a.y) ** 2) <= a.radius ** 2;
+      }
+      if (a.type == 'line' && b.type == 'circle') {
+        var line = a;
+        var circle = b;
+        var A = line.start;
+        var B = line.end;
+        var C = {x: circle.x, y: circle.y};
+        var radius = circle.radius;
+        var dist;
+        const v1x = B.x - A.x;
+        const v1y = B.y - A.y;
+        const v2x = C.x - A.x;
+        const v2y = C.y - A.y;
+        const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
+        if(u >= 0 && u <= 1){
+            dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+        } else {
+            dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+        }
+        return dist < radius ** 2;
+      }
       if (a.type == 'polygon' && b.type == 'polygon') {
         function pointinpolygon(point, vs) {
-          var points = vs.computedPoints;
-          var x = point.x, y = point.y;
-          var inside = false;
-          for (var i = 0, j = points.length - 1; i < points.length; j = i++) {
-            var xi = points[i].x + vs.x, yi = points[i].y + vs.y;
-            var xj = points[j].x + vs.x, yj = points[j].y + vs.y;
-            var intersect = ((yi > y) != (yj > y))
-              && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-            if (intersect) inside = !inside;
-          }
-          return inside;
+          return moduleExports.Collision(point, vs);
+        };
+        var colliding = false;
+        a.computedPoints.forEach(pnt => {
+          if (pointinpolygon(pnt.add({ x: a.x, y: a.y }), b)) { colliding = true; }
+        });
+        if (colliding) return true;
+        b.computedPoints.forEach(pnt => {
+          if (pointinpolygon(pnt.add({ x: b.x, y: b.y }), a)) { colliding = true; }
+        });
+        if (colliding) return true;
+        return false;
+      }
+      if (b.type == 'line' && a.type == 'circle') {
+        var line = b;
+        var circle = a;
+        var A = line.start;
+        var B = line.end;
+        var C = {x: circle.x, y: circle.y};
+        var radius = circle.radius;
+        var dist;
+        const v1x = B.x - A.x;
+        const v1y = B.y - A.y;
+        const v2x = C.x - A.x;
+        const v2y = C.y - A.y;
+        const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
+        if(u >= 0 && u <= 1){
+            dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+        } else {
+            dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+        }
+        return dist < radius ** 2;
+      }
+      if (a.type == 'polygon' && b.type == 'polygon') {
+        function pointinpolygon(point, vs) {
+          return moduleExports.Collision(point, vs);
         };
         var colliding = false;
         a.computedPoints.forEach(pnt => {
@@ -311,16 +475,7 @@
       }
       if (a.type == 'circle' && b.type == 'polygon') {
         function pointinpolygon(point, vs) {
-          var x = point.x, y = point.y;
-          var inside = false;
-          for (var i = 0, j = vs.points.length - 1; i < vs.points.length; j = i++) {
-            var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
-            var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
-            var intersect = ((yi > y) != (yj > y))
-              && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-            if (intersect) inside = !inside;
-          }
-          return inside;
+          return moduleExports.Collision(point, vs);
         };
         function lineCircle(line, circle) {
           var A = line.start;

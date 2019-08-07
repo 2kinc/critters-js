@@ -1,81 +1,29 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-
-<head>
-  <meta charset="utf-8">
-  <title>FDssf</title>
-</head>
-
-<body>
-  <p></p>
-  <script src="index.js" charset="utf-8"></script>
-  <script type="text/javascript">
-    var game = new $C.World('#fff', 0, 500, 500, 0, 0, 0);
-    var polygon = new $C.Polygon('hi', 200, 400, [
-      new $C.Vector(0, -60),
-      new $C.Vector(-48, -16),
-      new $C.Vector(-30, 40),
-      new $C.Vector(30, 40),
-      new $C.Vector(48, -16)
-    ],'red');
-    var triangl = new $C.Polygon('cool', 300, 150, [new $C.Vector(-35, -65), new $C.Vector(-35, 35), new $C.Vector(65, 35)], 'blue');
-    var rectang = new $C.Rectangle('das', 90, 90, 75, 75, 'blue');
-    var circlec = new $C.Circle('yey', 300, 300, 37.5, 'blue');
-    var circlea = new $C.Circle('ddaf', 300, 260, 37.5, 'blue');
-    game.set(polygon, rectang, circlec, triangl);
-    function pointinpolygon(point, vs) {
-      var x = point.x, y = point.y;
-      var inside = false;
-      for (var i = 0, j = vs.points.length - 1; i < vs.points.length; j = i++) {
-        var xi = vs.points[i].x + vs.x, yi = vs.points[i].y + vs.y;
-        var xj = vs.points[j].x + vs.x, yj = vs.points[j].y + vs.y;
-        var intersect = ((yi > y) != (yj > y))
-          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
+  <head>
+    <meta charset="utf-8">
+    <title>FDssf</title>
+  </head>
+  <body>
+    <script src="index.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      var game = new $C.World('#fff', 0, 500, 500, 0, 0, 0);
+      var polygon = new $C.Polygon('hi', 200, 400, '0,-25 -24,-8 -15,20 15,20 24,-8','blue');
+      var triangl = new $C.Polygon('cool', 300, 150, '0,-37.5 -50,50 50,50', 'blue');
+      var groundg = new $C.Rectangle('das', 250, 480, 5000, 50, 'black');
+      var circlec = new $C.Circle('yey', 300, 300, 37.5, 'blue');
+      game.set(polygon, groundg, circlec, triangl);
+      polygon.gravity = true;
+      triangl.gravity = true;
+      circlec.gravity = true;
+      groundg.static = true;
+      game.update = function() {
+        this.cam.x = polygon.x - 200;
+        if (this.keys.w) polygon.addForce({y:-5})
+        if (this.keys.a) polygon.addForce({x:-1})
+        if (this.keys.s) polygon.addForce({y:5})
+        if (this.keys.d) polygon.addForce({x:1})
       }
-      return inside;
-    };
-    function pointInCircle(x, y, cx, cy, radius) {
-      var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
-      return distancesquared <= radius * radius;
-    }
-    var selectshape, seloffx, seloffy;
-    game.update = function() {
-      rectang.color = 'blue';
-      triangl.color = 'blue';
-      polygon.color = 'blue';
-      circlec.color = 'blue';
-      if ($C.Collision(polygon, triangl) || $C.Collision(rectang, triangl) || $C.Collision(circlec, triangl)) {
-        triangl.color = 'red';
-      } if ($C.Collision(polygon, circlec) || $C.Collision(rectang, circlec) || $C.Collision(triangl, circlec)) {
-        circlec.color = 'red';
-      } if ($C.Collision(polygon, rectang) || $C.Collision(triangl, rectang) || $C.Collision(circlec, rectang)) {
-        rectang.color = 'red';
-      } if ($C.Collision(triangl, polygon) || $C.Collision(rectang, polygon) || $C.Collision(circlec, polygon)) {
-        polygon.color = 'red';
-      }
-      selectshape = undefined;
-      seloffx = undefined;
-      seloffy = undefined;
-      if (this.mouse.clicked) {
-        this.objects.forEach(function(obj) {
-          if (obj.type == 'polygon') {
-            if (pointinpolygon({x:game.mouse.x, y:game.mouse.y}, obj)) {
-              selectshape = obj;
-            }
-          } else if (obj.type == 'circle') {
-            if (pointInCircle(game.mouse.x, game.mouse.y, obj.x, obj.y, obj.radius)) {
-              selectshape = obj;
-            }
-          }
-        });
-      }
-      if (selectshape != undefined) {
-        selectshape.x = this.mouse.x;
-        selectshape.y = this.mouse.y;
-      }
-    }
-  </script>
-</body>
-
+      </script>
+    </body>
 </html>
