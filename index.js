@@ -202,11 +202,14 @@
         }
       }
       static NGON (name, sides, size, center, color, customprops) {
-        step = 2 * Math.PI / sides + (Math.PI / 180) * -18;
-        polygon = new Polygon(name, center.x, center.y, [], color, customprops);
+        var step = 2 * Math.PI / sides;
+        var shift = (Math.PI / 180.0) * -18;
+        var vertices = [];
         for (var i = 0; i < sides; i++) {
-
+          var s = i * step + shift;
+          vertices.push(new mod.Vector(size * Math.cos(s), size * Math.sin(s)))
         }
+        return new Polygon(name, center.x, center.y, vertices, color, customprops);
       }
       get minx () {
         var min = Infinity;
