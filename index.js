@@ -108,11 +108,21 @@
         });
         return new Vector(x, y);
       }
+      project (line) {
+        var slope2 = -1 / line.slope;
+        var yint2 = this.y - slope2 * this.x;
+        var nx = (yint2 - line.yint) / (slope - slope2);
+        return new Vector(nx, (slope * nx) + line.yint);
+      }
       add(vector) {
         return mod.Vector.sum(this, vector);
       }
       sub(vector) {
         return mod.Vector.sum(this, -vector);
+      } //wait let me test
+      //
+      static dot(vector1, vector2) {
+        return vector1.x * vector2.x + vector1.y * vector2.y;
       }
       dot(vector) {
         return this.x * vector.x + this.y * vector.y;
@@ -149,7 +159,9 @@
         return -(this.start.y - this.end.y) / (this.start.x - this.end.x);
       }
       get yint() {
-        //return 
+        var slope = this.slope;
+        if (slope == undefined) return undefined;
+        return this.start.y - slope * this.start.x;
       }
       get angle() {
         return Math.atan(-(this.start.y - this.end.y) / (this.start.x - this.end.x)) * (180 / Math.PI);
@@ -187,6 +199,13 @@
         this.outlineWidth = 1;
         for (var customprop in customprops) {
           this[customprop] = customprops[customprop];
+        }
+      }
+      static NGON (name, sides, size, center, color, customprops) {
+        step = 2 * Math.PI / sides + (Math.PI / 180) * -18;
+        polygon = new Polygon(name, center.x, center.y, [], color, customprops);
+        for (var i = 0; i < sides; i++) {
+
         }
       }
       get minx () {
