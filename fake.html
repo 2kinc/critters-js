@@ -8,21 +8,22 @@
     <script src="index.js" charset="utf-8"></script>
     <script type="text/javascript">
       var game = new $C.World('#fff', 0, 500, 500, 0, 0, 0);
-      var polygon = new $C.Polygon('hi', 200, 400, '0,-25 -24,-8 -15,20 15,20 24,-8','blue');
-      var triangl = new $C.Polygon('cool', 300, 150, '0,-37.5 -50,50 50,50', 'blue');
+      var polygon = new $C.Polygon('hi', 200, 400, "0,-25 23.776412907378838,-7.7254248593736845 14.694631307311829,20.225424859373682 -14.694631307311827,20.225424859373685 -23.77641290737884,-7.725424859373683",'blue');
+      var triangl = new $C.Polygon('cool', 300, 150, '50,0 -24.99999999999999,43.30127018922194 -25.00000000000002,-43.301270189221924', 'blue');
       var groundg = new $C.Rectangle('das', 250, 480, 5000, 50, 'black');
       var circlec = new $C.Circle('yey', 300, 300, 37.5, 'blue');
       game.set(polygon, groundg, circlec, triangl);
-      polygon.gravity = true;
-      triangl.gravity = true;
-      circlec.gravity = true;
+      //polygon.gravity = true;
+      //triangl.gravity = true;
+      //circlec.gravity = true;
       groundg.static = true;
       game.update = function() {
-        this.cam.x = polygon.x - 200;
-        if (this.keys.w) polygon.addForce({y:-5})
-        if (this.keys.a) polygon.addForce({x:-1})
-        if (this.keys.s) polygon.addForce({y:5})
-        if (this.keys.d) polygon.addForce({x:1})
+        this.cam.x = polygon.x - 250;
+        this.cam.y = polygon.y - 250;
+        if (this.keys.w) polygon.addForce(polygon.up(1));
+        if (this.keys.a) polygon.addForce(polygon.left(1));
+        if (this.keys.s) polygon.addForce(polygon.down(1));
+        if (this.keys.d) polygon.addForce(polygon.right(1));
       }
       </script>
     </body>
