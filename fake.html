@@ -24,6 +24,10 @@
         if (this.keys.a) polygon.addForce(polygon.left(1));
         if (this.keys.s) polygon.addForce(polygon.down(1));
         if (this.keys.d) polygon.addForce(polygon.right(1));
+        if ($C.newCollision(polygon, triangl)) 
+          polygon.color = 'red'; 
+        else 
+          polygon.color = 'blue';
       }
       </script>
     </body>

@@ -45,7 +45,7 @@
           that.context.lineWidth = obj.outlineWidth;
           that.context.fillStyle = obj.color;
           if (obj.type == 'polygon') {
-            if (obj.typetemp == 'rectangle') obj.points = [new mod.Vector(-obj.width/2, -obj.height/2), new mod.Vector(obj.width/2, -obj.height/2), new mod.Vector(obj.width/2, obj.height/2), new mod.Vector(-obj.width/2, obj.height/2)];
+            if (obj.typetemp == 'rectangle') obj.points = [new mod.Vector(-obj.width / 2, -obj.height / 2), new mod.Vector(obj.width / 2, -obj.height / 2), new mod.Vector(obj.width / 2, obj.height / 2), new mod.Vector(-obj.width / 2, obj.height / 2)];
             obj.edges = [];
             var oblen = obj.computedPoints.length;
             for (var i = 0; i < oblen; i++) obj.edges[i] = new mod.Line(obj.computedPoints[i % oblen], obj.computedPoints[(i + 1) % (oblen)]);
@@ -62,14 +62,14 @@
           that.context.restore();
         });
       };
-      this.physicsUpdate = function() {
+      this.physicsUpdate = function () {
         that.objects.forEach(function (obj) {
-          previous = {x:obj.x, y:obj.y};
+          previous = { x: obj.x, y: obj.y };
           obj.x += obj.acceleration.x;
           obj.y += obj.acceleration.y;
           obj.acceleration.x *= 0.9;
           obj.acceleration.y *= 0.9;
-          if (obj.gravity) obj.addForce({x:0, y:1.1})
+          if (obj.gravity) obj.addForce({ x: 0, y: 1.1 })
           that.objects.forEach(function (object) {
             if (obj != object && mod.Collision(object, obj)) {
               if (obj.type == 'polygon' && object.type == 'polygon') {
@@ -98,7 +98,7 @@
         this.x = x || 0;
         this.y = y || 0;
       }
-      get type () {return 'vector'}
+      get type() { return 'vector' }
       static sum(...vectors) {
         var x = 0;
         var y = 0;
@@ -108,19 +108,21 @@
         });
         return new Vector(x, y);
       }
-      project (line) {
+      perp() {
+        return new Vector(-(this.y), this.x);
+      }
+      project(line) {
         var slope2 = -1 / line.slope;
         var yint2 = this.y - slope2 * this.x;
         var nx = (yint2 - line.yint) / (slope - slope2);
         return new Vector(nx, (slope * nx) + line.yint);
       }
       add(vector) {
-        return mod.Vector.sum(this, vector);
+        return new Vector(this.x + vector.x, this.y + vector.y);
       }
-      sub(vector) {
-        return mod.Vector.sum(this, -vector);
-      } //wait let me test
-      //
+      subtract(vector) {
+        return new Vector(this.x - vector.x, this.y - vector.y);
+      }
       static dot(vector1, vector2) {
         return vector1.x * vector2.x + vector1.y * vector2.y;
       }
@@ -132,9 +134,9 @@
       }
       static rotateAroundOrigin(vector, angle) {
         var radians = (Math.PI / 180) * angle,
-        cos = Math.cos(radians), sin = Math.sin(radians),
-        nx = (cos * vector.x) - (sin * vector.y),
-        ny = (cos * vector.y) + (sin * vector.x);
+          cos = Math.cos(radians), sin = Math.sin(radians),
+          nx = (cos * vector.x) - (sin * vector.y),
+          ny = (cos * vector.y) + (sin * vector.x);
         return new Vector(nx, ny);
       }
     },
@@ -154,7 +156,7 @@
         });
         return result;
       }
-      get type () {return 'line'}
+      get type() { return 'line' }
       get slope() {
         return -(this.start.y - this.end.y) / (this.start.x - this.end.x);
       }
@@ -166,6 +168,10 @@
       get angle() {
         return Math.atan(-(this.start.y - this.end.y) / (this.start.x - this.end.x)) * (180 / Math.PI);
       }
+      dot(vector) {
+        var slope = new mod.Vector(this.slope, 1);
+        return slope.x * vector.x + slope.y * vector.y;
+      }
       add(line) {
         var result = JSON.parse(JSON.stringify(this));
         result.start.x += line.start.x;
@@ -173,6 +179,37 @@
         result.end.x += line.end.x;
         result.end.y += line.end.y;
         return result;
+      }
+    },
+    Projection: class Projection {
+      constructor(min, max) {
+        this.min = min;
+        this.max = max;
+      }
+      overlap(proj) {
+        if (this.max > proj.min)
+          return true;
+        if (this.min > proj.max)
+          return true;
+        return false;
+      }
+    },
+    Axis: class Axis {
+      constructor(vector_or_x, y) {
+        if (y) {
+          this.x = vector_or_x;
+          this.y = y;
+        } else {
+          this.x = vector_or_x.x;
+          this.y = vector_or_x.y;
+        }
+      }
+      dot(vector) {
+        return this.x * vector.x + this.y * vector.y;
+      }
+      get normalized() {
+        var l = Math.sqrt(this.x ** 2 + this.y ** 2);
+        return new Axis(this.x / l, this.y / l);
       }
     },
     //Polygon constructor
@@ -185,7 +222,7 @@
         if (typeof points == 'string') {
           var d = [];
           points.split(' ').forEach(function (itm) {
-	           d.push(new mod.Vector(Number(itm.split(',')[0]), Number(itm.split(',')[1])))
+            d.push(new mod.Vector(Number(itm.split(',')[0]), Number(itm.split(',')[1])))
           });
           points = d;
         }
@@ -201,7 +238,7 @@
           this[customprop] = customprops[customprop];
         }
       }
-      static NGON (name, sides, size, center, color, customprops) {
+      static NGON(name, sides, size, center, color, customprops) {
         var step = 2 * Math.PI / sides;
         var shift = (Math.PI / 180.0) * -18;
         var vertices = [];
@@ -211,30 +248,30 @@
         }
         return new Polygon(name, center.x, center.y, vertices, color, customprops);
       }
-      get minx () {
+      get minx() {
         var min = Infinity;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (min > itm.x) min = itm.x;
         });
         return min + this.x;
       }
-      get miny () {
+      get miny() {
         var min = Infinity;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (min > itm.y) min = itm.y;
         });
         return min + this.y;
       }
-      get maxx () {
+      get maxx() {
         var max = 0;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (max < itm.x) max = itm.x;
         });
         return max + this.x;
       }
-      get maxy () {
+      get maxy() {
         var max = 0;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (max < itm.y) max = itm.y;
         });
         return max + this.y;
@@ -247,28 +284,61 @@
           points.push(newPoint);
         });
         return points;
-      } addForce (force) {
+      }
+      project(axis) {
+        var vertices = this.computedPoints;
+        var normalized = axis.normalized;
+        var min = normalized.dot(vertices[0].add(new mod.Vector(this.x, this.y)));
+        var max = min;
+        for (var i = 1; i < vertices.length; i++) {
+          var p = normalized.dot(vertices[i].add(new mod.Vector(this.x, this.y)));
+          if (p < min) {
+            min = p;
+          } else if (p > max) {
+            max = p;
+          }
+        }
+        var projection = new mod.Projection(min, max);
+        return projection;
+      }
+      static getAxes(polygon) {
+        var axes = [];
+        var vertices = polygon.computedPoints;
+        for (var i = 0; i < vertices.length; i++) {
+          var p1 = vertices[i]; //current vertex
+          var p2 = vertices[i + 1 == vertices.length ? 0 : i + 1]; //next vertex
+          var edge = p1.subtract(p2); //get edge vector
+          var normal = edge.perp();
+          axes[i] = new mod.Axis(normal);
+        }
+        return axes;
+      }
+      addForce(force) {
         this.acceleration.x += (force.x / (this.mass || 1)) || 0;
         this.acceleration.y += (force.y / (this.mass || 1)) || 0;
-      } up(d) {
+      }
+      up(d) {
         var vec = new mod.Vector(0, 0);
-        vec.y -= d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.x += d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.y -= d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.x += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
-      } down(d) {
+      }
+      down(d) {
         var vec = new mod.Vector(0, 0);
-        vec.y += d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.x -= d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.y += d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.x -= d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
-      } right(d) {
+      }
+      right(d) {
         var vec = new mod.Vector(0, 0);
-        vec.x += d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.y -= d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.x += d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.y -= d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
-      } left(d) {
+      }
+      left(d) {
         var vec = new mod.Vector(0, 0);
-        vec.x -= d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.y += d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.x -= d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.y += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       }
     },
@@ -282,30 +352,30 @@
         this.width = width;
         this.height = height;
       }
-      get minx () {
+      get minx() {
         var min = Infinity;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (min > itm.x) min = itm.x;
         });
         return min + this.x;
       }
-      get miny () {
+      get miny() {
         var min = Infinity;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (min > itm.y) min = itm.y;
         });
         return min + this.y;
       }
-      get maxx () {
+      get maxx() {
         var max = 0;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (max < itm.x) max = itm.x;
         });
         return max + this.x;
       }
-      get maxy () {
+      get maxy() {
         var max = 0;
-        this.computedPoints.forEach(function(itm) {
+        this.computedPoints.forEach(function (itm) {
           if (max < itm.y) max = itm.y;
         });
         return max + this.y;
@@ -318,28 +388,28 @@
           points.push(newPoint);
         });
         return points;
-      } addForce (force) {
+      } addForce(force) {
         this.acceleration.x += (force.x / (this.mass || 1)) || 0;
         this.acceleration.y += (force.y / (this.mass || 1)) || 0;
       } up(d) {
         var vec = new mod.Vector(0, 0);
-        vec.y -= d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.x += d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.y -= d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.x += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       } down(d) {
         var vec = new mod.Vector(0, 0);
-        vec.y += d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.x -= d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.y += d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.x -= d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       } right(d) {
         var vec = new mod.Vector(0, 0);
-        vec.x += d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.y -= d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.x += d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.y -= d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       } left(d) {
         var vec = new mod.Vector(0, 0);
-        vec.x -= d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.y += d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.x -= d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.y += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       }
     },
@@ -353,40 +423,40 @@
         this.radius = radius;
         this.color = color;
         this.mass = mass;
-      } addForce (force) {
+      } addForce(force) {
         this.acceleration.x += (force.x / (this.mass || 1)) || 0;
         this.acceleration.y += (force.y / (this.mass || 1)) || 0;
       } up(d) {
         var vec = new mod.Vector(0, 0);
-        vec.y -= d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.x += d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.y -= d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.x += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       } down(d) {
         var vec = new mod.Vector(0, 0);
-        vec.y += d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.x -= d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.y += d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.x -= d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       } right(d) {
         var vec = new mod.Vector(0, 0);
-        vec.x += d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.y -= d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.x += d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.y -= d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       } left(d) {
         var vec = new mod.Vector(0, 0);
-        vec.x -= d * Math.cos((this.rotation*(Math.PI/180)));
-        vec.y += d * Math.sin((this.rotation*(Math.PI/180)));
+        vec.x -= d * Math.cos((this.rotation * (Math.PI / 180)));
+        vec.y += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       }
-      get minx () {
+      get minx() {
         return this.x - this.radius;
       }
-      get miny () {
+      get miny() {
         return this.y - this.radius;
       }
-      get maxx () {
+      get maxx() {
         return this.x + this.radius;
       }
-      get maxy () {
+      get maxy() {
         return this.y + this.radius;
       }
     },
@@ -439,7 +509,7 @@
         var circle = b;
         var A = line.start;
         var B = line.end;
-        var C = {x: circle.x, y: circle.y};
+        var C = { x: circle.x, y: circle.y };
         var radius = circle.radius;
         var dist;
         const v1x = B.x - A.x;
@@ -447,10 +517,10 @@
         const v2x = C.x - A.x;
         const v2y = C.y - A.y;
         const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
-        if(u >= 0 && u <= 1){
-            dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+        if (u >= 0 && u <= 1) {
+          dist = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
         } else {
-            dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+          dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
         }
         return dist < radius ** 2;
       }
@@ -465,7 +535,7 @@
         var circle = a;
         var A = line.start;
         var B = line.end;
-        var C = {x: circle.x, y: circle.y};
+        var C = { x: circle.x, y: circle.y };
         var radius = circle.radius;
         var dist;
         const v1x = B.x - A.x;
@@ -473,10 +543,10 @@
         const v2x = C.x - A.x;
         const v2y = C.y - A.y;
         const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
-        if(u >= 0 && u <= 1){
-            dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+        if (u >= 0 && u <= 1) {
+          dist = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
         } else {
-            dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+          dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
         }
         return dist < radius ** 2;
       }
@@ -487,7 +557,7 @@
         function lineCircle(line, circle) {
           var A = line.start;
           var B = line.end;
-          var C = {x: circle.x, y: circle.y};
+          var C = { x: circle.x, y: circle.y };
           var radius = circle.radius;
           var dist;
           const v1x = B.x - A.x;
@@ -495,16 +565,16 @@
           const v2x = C.x - A.x;
           const v2y = C.y - A.y;
           const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
-          if(u >= 0 && u <= 1){
-              dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+          if (u >= 0 && u <= 1) {
+            dist = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
           } else {
-              dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+            dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
           }
           return dist < radius ** 2;
         }
-        if (pointinpolygon({x:a.x, y:a.y}, b)) return true;
+        if (pointinpolygon({ x: a.x, y: a.y }, b)) return true;
         for (var i = 0; i < b.edges.length; i++) {
-          if (lineCircle(b.edges[i].add({start:{x:b.x, y:b.y}, end:{x:b.x, y:b.y}}), a)) return true;
+          if (lineCircle(b.edges[i].add({ start: { x: b.x, y: b.y }, end: { x: b.x, y: b.y } }), a)) return true;
         };
         return false;
       }
@@ -515,7 +585,7 @@
         function lineCircle(line, circle) {
           var A = line.start;
           var B = line.end;
-          var C = {x: circle.x, y: circle.y};
+          var C = { x: circle.x, y: circle.y };
           var radius = circle.radius;
           var dist;
           const v1x = B.x - A.x;
@@ -523,21 +593,49 @@
           const v2x = C.x - A.x;
           const v2y = C.y - A.y;
           const u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
-          if(u >= 0 && u <= 1){
-              dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+          if (u >= 0 && u <= 1) {
+            dist = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
           } else {
-              dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
+            dist = u < 0 ? (A.x - C.x) ** 2 + (A.y - C.y) ** 2 : (B.x - C.x) ** 2 + (B.y - C.y) ** 2;
           }
           return dist < radius ** 2;
         }
-        if (pointinpolygon({x:b.x, y:b.y}, a)) return true;
+        if (pointinpolygon({ x: b.x, y: b.y }, a)) return true;
         for (var i = 0; i < a.edges.length; i++) {
-          if (lineCircle(a.edges[i].add({start:{x:a.x, y:a.y}, end:{x:a.x, y:a.y}}), b)) return true;
+          if (lineCircle(a.edges[i].add({ start: { x: a.x, y: a.y }, end: { x: a.x, y: a.y } }), b)) return true;
         };
         return false;
       }
       if (a.type == 'circle' && b.type == 'circle') {
         return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5 < a.radius + b.radius;
+      }
+    },
+    newCollision: function (a, b) {
+      if (a.type == 'polygon' && b.type == 'polygon') {
+        var axes1 = mod.Polygon.getAxes(a);
+        var axes2 = mod.Polygon.getAxes(b);
+        
+        for (var i = 0; i < axes1.length; i++) { //loop through axes1
+          var axis = axes1[i];
+          //project the shapes!
+          var p1 = a.project(axis);
+          var p2 = b.project(axis);
+
+          if (!p1.overlap(p2))
+            return false; //if they don't overlap, then there's no collision
+        }
+
+        for (var i = 0; i < axes2.length; i++) { //loop through axes2
+          var axis = axes2[i];
+          //project the shapes!
+          var p1 = a.project(axis);
+          var p2 = b.project(axis);
+
+          if (!p1.overlap(p2))
+            return false; //if they don't overlap, then there's no collision
+        }
+
+        return true; //all of them overlap, collision
       }
     }
   };
