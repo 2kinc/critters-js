@@ -1,5 +1,17 @@
 (function (global) {
   var mod = {
+    Mouse: class Mouse {
+      constructor(window, world) {
+        this.window = window;
+        this.world = world;
+        this.clicked = false;
+        this.x = 0;
+        this.y = 0;
+        this.world.el.addEventListener('mousedown', e => this.clicked = true);
+        this.world.el.addEventListener('mouseup', e => this.clicked = false);
+        this.world.el.addEventListener('mousemove', e => {this.x = Math.floor(e.clientX - this.world.el.getBoundingClientRect().left + this.world.cam.x); this.y = Math.floor(e.clientY - this.world.el.getBoundingClientRect().top + this.world.cam.y); })
+      }
+    },
     World: function (bgcolor, parent, width, height, camx, camy, gravity, customprops) {
       //Get everything started
       var that = this;
@@ -23,11 +35,8 @@
       document.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
       document.addEventListener('mouseleave', () => this.keys = {});
       document.addEventListener('blur', () => this.keys = {});
-      this.mouse = new mod.Vector(0, 0);
+      this.mouse = new mod.Mouse(global, this);
       this.mouse.clicked = false;
-      this.el.addEventListener('mousemove', e => { this.mouse.x = e.clientX - this.el.getBoundingClientRect().left; this.mouse.y = e.clientY - this.el.getBoundingClientRect().top; });
-      this.el.addEventListener('mousedown', e => this.mouse.clicked = true);
-      this.el.addEventListener('mouseup', e => this.mouse.clicked = false);
       this.objects = new Map();
       this.set = (...obs) => obs.forEach(ob => this.objects.set(ob.name, ob));
       this.get = ob => this.objects.get(ob);
@@ -44,39 +53,44 @@
           that.context.strokeStyle = obj.outlineColor || obj.color;
           that.context.lineWidth = obj.outlineWidth;
           that.context.fillStyle = obj.color;
+          if (!obj.fixed) that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
+          else that.context.translate(obj.x * that.cam.zoom, obj.y * that.cam.zoom);
           if (obj.type == 'polygon') {
             if (obj.typetemp == 'rectangle') obj.points = [new mod.Vector(-obj.width / 2, -obj.height / 2), new mod.Vector(obj.width / 2, -obj.height / 2), new mod.Vector(obj.width / 2, obj.height / 2), new mod.Vector(-obj.width / 2, obj.height / 2)];
             obj.edges = [];
             var oblen = obj.computedPoints.length;
             for (var i = 0; i < oblen; i++) obj.edges[i] = new mod.Line(obj.computedPoints[i % oblen], obj.computedPoints[(i + 1) % (oblen)]);
-            that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
             that.context.moveTo(obj.computedPoints[0].x, obj.computedPoints[0].y);
             obj.computedPoints.forEach(a => that.context.lineTo(a.x, a.y));
             that.context.closePath();
             that.context.fill();
           } else if (obj.type == 'circle') {
-            that.context.translate((obj.x - that.cam.x) * that.cam.zoom, (obj.y - that.cam.y) * that.cam.zoom);
             that.context.arc(0, 0, obj.radius * that.cam.zoom, 0, Math.PI * 2);
             that.context.fill();
+          } else if (obj.type == 'text') {
+            that.context.font = obj.font;
+            that.context.fillText(obj.text, 0, 0);
           }
           that.context.restore();
         });
       };
       this.physicsUpdate = function () {
         that.objects.forEach(function (obj) {
-          previous = { x: obj.x, y: obj.y };
-          obj.x += obj.acceleration.x;
-          obj.y += obj.acceleration.y;
-          obj.acceleration.x *= 0.9;
-          obj.acceleration.y *= 0.9;
-          if (obj.gravity) obj.addForce({ x: 0, y: 1.1 })
-          that.objects.forEach(function (object) {
-            if (obj != object && mod.Collision(object, obj)) {
-              if (obj.type == 'polygon' && object.type == 'polygon') {
+          if (obj.physics){
+            previous = { x: obj.x, y: obj.y };
+            obj.x += obj.acceleration.x;
+            obj.y += obj.acceleration.y;
+            obj.acceleration.x *= 0.9;
+            obj.acceleration.y *= 0.9;
+            if (obj.gravity) obj.addForce({ x: 0, y: 1.1 })
+            that.objects.forEach(function (object) {
+              if (obj != object && mod.Collision(object, obj)) {
+                if (obj.type == 'polygon' && object.type == 'polygon') {
 
+                }
               }
-            }
-          });
+            });
+          }
         });
       };
       this.frame = function () {
@@ -139,6 +153,7 @@
           ny = (cos * vector.y) + (sin * vector.x);
         return new Vector(nx, ny);
       }
+      get physics () {return false;}
     },
     //Line constructor
     Line: class Line {
@@ -180,6 +195,7 @@
         result.end.y += line.end.y;
         return result;
       }
+      get physics() {return false;}
     },
     Projection: class Projection {
       constructor(min, max) {
@@ -193,6 +209,7 @@
           return true;
         return false;
       }
+      get physics() {return false;}
     },
     Axis: class Axis {
       constructor(vector_or_x, y) {
@@ -211,6 +228,7 @@
         var l = Math.sqrt(this.x ** 2 + this.y ** 2);
         return new Axis(this.x / l, this.y / l);
       }
+      get physics() {return false;}
     },
     //Polygon constructor
     Polygon: class Polygon {
@@ -306,12 +324,22 @@
         var vertices = polygon.computedPoints;
         for (var i = 0; i < vertices.length; i++) {
           var p1 = vertices[i]; //current vertex
-          var p2 = vertices[i + 1 == vertices.length ? 0 : i + 1]; //next vertex
+          var p2 = vertices[(i + 1) % vertices.length]; //next vertex
           var edge = p1.subtract(p2); //get edge vector
           var normal = edge.perp();
           axes[i] = new mod.Axis(normal);
         }
+        axes.normalized = function () {
+          var normalized = [];
+          for (var i = 0; i < axes.length; i++) {
+            normalized[i] = axes[i].normalized;
+          }
+          return normalized;
+        }
         return axes;
+      }
+      getAxes() {
+        return mod.Polygon.getAxes(this);
       }
       addForce(force) {
         this.acceleration.x += (force.x / (this.mass || 1)) || 0;
@@ -341,6 +369,25 @@
         vec.y += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       }
+      get physics() {return true;}
+    },
+    Text: class Text {
+      constructor(name, x, y, text, font, color, maxwidth, customprops) {
+        this.name = name;
+        this.x = x || 0;
+        this.y = y || 0;
+        this.text = text || '';
+        this.font = font || '12px Arial';
+        this.color = color || 'black';
+        this.maxwidth = maxwidth || Infinity;
+        for (var customprop in customprops) {
+          this[customprop] = customprops[customprop];
+        }
+      }
+
+      get type () {return 'text';}
+
+      get physics() {return false;}
     },
     Rectangle: class Rectangle {
       constructor(name, x, y, width, height, color, mass) {
@@ -412,6 +459,7 @@
         vec.y += d * Math.sin((this.rotation * (Math.PI / 180)));
         return vec;
       }
+      get physics() {return true;}
     },
     Circle: class Circle {
       constructor(name, x, y, radius, color, mass) {
@@ -459,6 +507,7 @@
       get maxy() {
         return this.y + this.radius;
       }
+      get physics() {return true;}
     },
     Collision: function (a, b) {
       if (a.type == 'line' && b.type == 'line') {
@@ -612,9 +661,9 @@
     },
     newCollision: function (a, b) {
       if (a.type == 'polygon' && b.type == 'polygon') {
-        var axes1 = mod.Polygon.getAxes(a);
-        var axes2 = mod.Polygon.getAxes(b);
-        
+        var axes1 = a.getAxes();
+        var axes2 = a.getAxes();
+
         for (var i = 0; i < axes1.length; i++) { //loop through axes1
           var axis = axes1[i];
           //project the shapes!
